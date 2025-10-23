@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  ::-webkit-scrollbar {
+    display: block;
+    width: 10px;
+    @apply bg-brand
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-primary-background rounded-lg
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-500 rounded-lg
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400
+  }
+
+  .dark {
+    ::-webkit-scrollbar {
+      @apply bg-brand-dark
+    }
+
+    ::-webkit-scrollbar-track {
+      @apply bg-brand-active-dark rounded-lg
+    }
+  }
+}
+
+@theme {
+  --color-brand: #FFFFFF;
+  --color-brand-light: #FFFFFF;
+  --color-brand-dark: #384362;
+
+  --color-brand-active: #F3F6FB;
+  --color-brand-active-light: var(--color-brand-active-light);
+  --color-brand-active-dark: #3D526C;
+
+  --color-primary-background: #F6F5F9;
+  --color-primary-background-light: var(--color-primary-background);
+  --color-primary-background-dark: #24315B;
+
+  --color-separator: var(--color-gray-300);
+  --color-separator-dark: #435b78;
+
+  --color-checkbox-off: #E7E7E7;
+  --color-checkbox-on: #24315B;
+  
+  --color-checkbox-off-dark: #515A72;  
+  --color-checkbox-on-dark: #DDE2FF;
+
+  --color-active-bar: #4F88DB;
+  --color-active-bar-dark: #65e7c6;
+
+  --color-button: #3074D6;
+  --color-button-hover: #327AE3;
+
+  --shadow-brand-active: 4px 0px 0px 0px rgb(79,136,219);
+  --shadow-brand-active-dark: 4px 0px 0px 0px var(--color-active-bar-dark);
+
+  --color-brand-hover: var(--color-gray-300);
+  --color-brand-hover-light: var(--color-brand-hover);
+  --color-brand-hover-dark: #314257;
+
+  --color-primary: #364160;
+  --color-primary-light: var(--color-primary);
+  --color-primary-dark: #DDE2FF;
+
+  --color-inactive: #E5E4EB;
+
+  --color-secondary: #000000;
+}
