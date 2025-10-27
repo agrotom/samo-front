@@ -10,6 +10,13 @@ export const LifeBrightness: Balance = {
     color: "blue"
 };
 
+export const SunPower: Balance = {
+    id: "sunPower",
+    locale: "Солнечная энергия",
+    color: "orange"
+};
+
 export const BalanceTypes: Record<string, Balance> = {
-    lifeBrightness: LifeBrightness
+    lifeBrightness: LifeBrightness,
+    sunPower: SunPower
 };

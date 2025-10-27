@@ -1,31 +1,55 @@
 import { useEffect, useRef, useState } from "react";
-import type { TrackerData } from "@/api/trackers";
+import type EditableProperties from "../common/editable";
+import InlineEditableText from "./editableDiv";
+import { clamp } from "@/util/math";
 
-interface TrackerProperties {
+const MAX_STEPS = 11;
+const MIN_STEPS = 2;
+
+interface TrackerChangedEvent {
+    name: string;
+    totalSteps: number;
+    currentStep: number;
+}
+
+interface TrackerProperties extends EditableProperties {
     label?: string;
     totalSteps?: number;
     step?: number;
-    onChange?: (_: TrackerData) => void;
+    onChange?: (event: TrackerChangedEvent) => void;
     className?: string;
     stretch?: boolean;
 }
 
-export default function Tracker({ label = '', totalSteps = 11, step = 1, onChange = (_: TrackerData) => { return; }, className = '', stretch = false }: TrackerProperties) {
-    const [currentStep, setCurrentStep] = useState<number>(step);
+export default function Tracker({ label = '', totalSteps = 11, step = 1, onChange, className = '', editable, stretch = false }: TrackerProperties) {
+    const [currentStep, setCurrentStep] = useState<number>(clamp(step, 1, totalSteps));
+    const [totalStepsNow, setTotalStepsNow] = useState<number>(totalSteps);
+    const [tempTotalSteps, setTempTotalSteps] = useState<number>(totalSteps);
     const [dragging, setDragging] = useState<boolean>(false);
 
     const barRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        onChange({ name: label, totalSteps: totalSteps, currentStep: currentStep });
-    }, [currentStep]);
+        if (currentStep > totalStepsNow) {
+            setCurrentStep(totalStepsNow);
+        }
+
+        onChange?.({ name: label, totalSteps: clamp(totalStepsNow, MIN_STEPS, MAX_STEPS), currentStep: clamp(currentStep, 1, totalStepsNow) });
+    }, [currentStep, totalStepsNow]);
+
+    const onTotalStepsChanged = (newValue: string) => {
+        var value = Number.parseInt(newValue);
+        if (!isNaN(value)) {
+            setTempTotalSteps(value + 1);
+        }
+    }
 
     const updateValue = (clientX: number) => {
         if (!barRef.current) return;
         const rect = barRef.current.getBoundingClientRect();
         const relative = (clientX - rect.left) / rect.width;
-        const step = Math.floor(relative * totalSteps) + 1;
-        setCurrentStep(Math.max(Math.min(step, totalSteps), 1));
+        const step = Math.floor(relative * totalStepsNow) + 1;
+        setCurrentStep(clamp(step, 1, totalStepsNow));
     };
 
     const handleMouseDown = (e: any) => {
@@ -64,24 +88,26 @@ export default function Tracker({ label = '', totalSteps = 11, step = 1, onChang
     });
 
   // вычисляем процент заполнения
-  const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  const progress = ((currentStep - 1) / (totalStepsNow - 1)) * 100;
 
   return (
     <>
         <div className={`w-full sm:flex sm:flex-col md:flex-row items-center gap-6 select-none touch-none ${className}`}>
             {
                 label != '' &&
-                <div className="flex-shrink-0 text-left text-sm text-primary w-32">
-                    {label}
-                </div>
+                <InlineEditableText initText={label} editingAllow={editable} classNames={ { container: "flex-shrink-0 text-left text-sm text-primary w-32", input: "w-full" } } />
+
             }
             <div className={`w-full ${ !stretch && 'max-w-md' } mx-auto select-none`}>
                 <div className="flex justify-between mb-2">
-                    {Array.from({ length: totalSteps }).map((_, i) => (
-                    <div key={i} className={`text-sm font-medium text-center w-4 ${ i == 0 || i == currentStep - 1 || i == totalSteps - 1 ? 'text-primary font-medium dark:text-active-bar-dark' : 'text-inactive' }`}>
+                    {Array.from({ length: totalStepsNow - 1 }).map((_, i) => (
+                    <div key={i} className={`text-sm font-medium text-center w-4 ${ i == 0 || i == currentStep - 1 || i == totalStepsNow - 1 ? 'text-primary font-medium dark:text-active-bar-dark' : 'text-inactive' }`}>
                         {i}
                     </div>
                     ))}
+                    <div className={`text-sm font-medium text-center w-4 text-primary dark:text-active-bar-dark`}>
+                        <InlineEditableText onChange={ onTotalStepsChanged } onBlur={() => setTotalStepsNow(clamp(tempTotalSteps, MIN_STEPS, MAX_STEPS))} editingAllow={editable} numberOnly initText={`${totalStepsNow - 1}`} classNames={ { container: "overflow-hidden h-5", input: "w-full" } } />
+                    </div>
                 </div>
                 <div className="relative">
                     {/* Фон линии */}
@@ -95,7 +121,7 @@ export default function Tracker({ label = '', totalSteps = 11, step = 1, onChang
 
                     {/* Кликабельные точки */}
                     <div className="flex justify-between relative z-10">
-                    {Array.from({ length: totalSteps }).map((_, i) => {
+                    {Array.from({ length: totalStepsNow }).map((_, i) => {
                         const step = i + 1;
                         const isActive = step === Math.round(currentStep);
 

@@ -48,7 +48,7 @@ export function SortableCheckbox({ initText = '', hasLabel = true, value = false
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`flex overflow-hidden items-start ${className}`} {...props}>
             <Checkbox value={value} size={size} onChange={ newValue => onChange?.({ value: newValue, text: text }) } />
-            <EditableDiv initText={initText} editingAllow={!disabled} classNames={{container: 'ml-2.5'}}></EditableDiv>
+            <EditableDiv initText={initText} editingAllow={!disabled} onChange={ text => onChange?.({ value: value, text: text }) } classNames={{container: 'ml-2.5'}}></EditableDiv>
         </div>
     )
 }

@@ -10,11 +10,13 @@ export interface RiteData {
 }
 
 export interface TodayDeeds {
+    id: number;
     level: number;
     text: string;
 }
 
 export interface WeekHabit {
+    id: number;
     checks: boolean[];
     text: string;
 }
@@ -40,6 +42,7 @@ export interface DiaryData {
 
 export function getWorkHappines(): TrackerData {
     return {
+        id: 0,
         name: "Насколько я доволен работой",
         currentStep: 5,
         totalSteps: 11
@@ -48,6 +51,7 @@ export function getWorkHappines(): TrackerData {
 
 export function getSelfHappines(): TrackerData {
     return {
+        id: 0,
         name: "Насколько я счастлив",
         currentStep: 7,
         totalSteps: 11
@@ -68,18 +72,22 @@ export function getRites(): RiteData[] {
 export function getTodayDeeds(): TodayDeeds[] {
     return [
         {
+            id: 0,
             level: 0,
             text: '1. Подпись документов'
         },
         {
+            id: 1,
             level: 1,
             text: '2. Встреча с инвесторами'
         },
         {
+            id: 2,
             level: 2,
             text: '3. Свидание с Машей'
         },
         {
+            id: 3,
             level: 3,
             text: 'CRAFT'
         }
@@ -113,42 +121,45 @@ export function getTomorrowMainTasks(): string {
 export function getWeekHabits(): WeekHabit[] {
     return [
         {
+            id: 0,
             checks: [false, true, false, false, true, false, true],
             text: "Начать вставать в 6 часов утра"
         },
         {
+            id: 1,
             checks: [false, true, false, true, true, true, true],
             text: "Бросить курить"
         },
         {
+            id: 2,
             checks: [false, true, false, false, false, false, false],
             text: "Читать каждый день минимум час"
         }
     ];
 }
 
-export function saveRites(date: Date, rites: RiteData[]) {
-    console.log(`Saving rites ${ rites.map<string>(rite => rite.text + `: ${rite.completed}`) } to ${date} by user ${getUser()}`);
+export function saveRites(rites: RiteData[]) {
+    console.log(`Saving rites ${ rites.map<string>(rite => rite.text + `: ${rite.completed}`) } to ${ new Date() } by user ${getUser()}`);
 }
 
-export function saveFocus(date: Date, focus: string) {
-    console.log(`Saving focus ${ focus } to ${date} by user ${getUser()}`);
+export function saveFocus(focus: string) {
+    console.log(`Saving focus ${ focus } to ${ new Date() } by user ${getUser()}`);
 }
 
-export function saveThanks(date: Date, thanks: string) {
-    console.log(`Saving focus ${ thanks } to ${date} by user ${getUser()}`);
+export function saveThanks(thanks: string) {
+    console.log(`Saving focus ${ thanks } to ${ new Date() } by user ${getUser()}`);
 }
 
-export function saveInsight(date: Date, insight: string) {
-    console.log(`Saving focus ${ insight } to ${date} by user ${getUser()}`);
+export function saveInsight(insight: string) {
+    console.log(`Saving focus ${ insight } to ${ new Date() } by user ${getUser()}`);
 }
 
-export function saveProblems(date: Date, problems: string) {
-    console.log(`Saving focus ${ problems } to ${date} by user ${getUser()}`);
+export function saveProblems(problems: string) {
+    console.log(`Saving focus ${ problems } to ${ new Date() } by user ${getUser()}`);
 }
 
-export function saveResults(date: Date, results: string) {
-    console.log(`Saving focus ${ results } to ${date} by user ${getUser()}`);
+export function saveResults(results: string) {
+    console.log(`Saving focus ${ results } to ${ new Date() } by user ${getUser()}`);
 }
 
 export function saveTodayDeeds(todayDeeds: TodayDeeds[]) {
@@ -157,4 +168,16 @@ export function saveTodayDeeds(todayDeeds: TodayDeeds[]) {
 
 export function saveTomorrowMainTasks(tasks: string) {
     console.log(`Saving focus ${ tasks } to ${new Date()} by user ${getUser()}`);
+}
+
+export function saveWeekHabits(data: WeekHabit[]) {
+    console.log(`Saving habits ${ data.map(weekHabit => weekHabit.checks) } to ${ new Date() } by user ${getUser()}`);
+}
+
+export function setWorkHappiness(data: TrackerData) {
+    console.log(`Saving work happiness ${ data.currentStep } to ${ new Date() } by user ${getUser()}`);
+}
+
+export function setSelfHappiness(data: TrackerData) {
+    console.log(`Saving self happiness ${ data.currentStep } to ${ new Date() } by user ${getUser()}`);
 }

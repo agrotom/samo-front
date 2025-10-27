@@ -17,17 +17,15 @@ import { useEffect, useState } from 'react';
 import { ControllableHeader } from '@/components/ui/elements/text-header';
 
 import { SortableCheckbox } from '@/components/ui/elements/checkbox';
-import { type RiteData } from '@/api/diary';
+import { getRites, saveRites, type RiteData } from '@/api/diary';
 import type { SortableItem } from '@/util/sortable';
-import type SavingProperties from '@/components/ui/common/saving';
-import { defaultSaveFunc } from '@/components/ui/common/saving';
 
-interface RitesListProperties extends SavingProperties<RiteData[]> {
+interface RitesListProperties {
     className?: string;
 }
 
-export default function BlockRitesList({ loadedData = [], onSave = defaultSaveFunc, className = '' }: RitesListProperties) {
-    const [rites, setRites] = useState<SortableItem<RiteData>[]>(loadedData.sort((a, b) => a.sort_order - b.sort_order).map((rite, i) => { return { id: i, content: rite }; }).slice(0, 10));
+export default function BlockRitesList({ className = '' }: RitesListProperties) {
+    const [rites, setRites] = useState<SortableItem<RiteData>[]>(getRites().sort((a, b) => a.sort_order - b.sort_order).map((rite, i) => { return { id: i, content: rite }; }).slice(0, 10));
     const [editable, setEditable] = useState<boolean>(false);
 
     const sensors = useSensors(
@@ -46,7 +44,7 @@ export default function BlockRitesList({ loadedData = [], onSave = defaultSaveFu
     );
 
     useEffect(() => {
-        onSave(rites.map<RiteData>(rite => rite.content));
+        saveRites(rites.map<RiteData>(rite => rite.content));
     }, [rites]);
 
     function handleDragEnd(event: any) {
@@ -81,7 +79,7 @@ export default function BlockRitesList({ loadedData = [], onSave = defaultSaveFu
                                 items={rites.map(rite => rite.id)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {rites.map(rite => <SortableCheckbox disabled={!editable} className='mb-5' onChange={data => { rite.content.completed = data.value; rite.content.text = data.text; onSave(rites.map(rite => rite.content));}} value={rite.content.completed} key={rite.id} id={rite.id} initText={rite.content.text} />)}
+                                {rites.map(rite => <SortableCheckbox disabled={!editable} className='mb-5' onChange={data => { rite.content.completed = data.value; rite.content.text = data.text; saveRites(rites.map(rite => rite.content));}} value={rite.content.completed} key={rite.id} id={rite.id} initText={rite.content.text} />)}
                             </SortableContext>
                         </DndContext>
                     </div>

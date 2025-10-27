@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -34,33 +34,50 @@ function CustomCaptionComponent(props: MonthCaptionProps) {
 }
 
 interface CalendarProperties {
-    ref: React.Dispatch<React.SetStateAction<Date>>;
     currentDate?: Date;
+    open?: boolean;
+    setOpen?:(value: boolean) => void;
+    onChange?: (date: Date) => void;
 }
 
-export default function Calendar({ ref, currentDate = new Date() }: CalendarProperties) {
+export default function Calendar({ currentDate = new Date(), onChange, open, setOpen }: CalendarProperties) {
     const defaultClassNames = getDefaultClassNames();
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(open ?? false);
     const [selected, setSelected] = useState<Date>(currentDate);
-    
+
+    useEffect(() => {
+      if (open !== undefined) {
+        setShow(open);
+      }
+    }, [open]);
+
     return (
         <div className="">
-            <div className="flex flex-row cursor-pointer items-center justify-center" onClick={() => setShow(!show)}>
-                <input
-                    type="text"
-                    readOnly
-                    disabled
-                    value={format(selected, "dd.LL.yyyy", {locale: ru}) + ' ' + selected.toLocaleDateString("ru-RU", { weekday: 'short' }).toUpperCase()}
-                    className="rounded font-medium text-lg w-38 tracking-wider"/>
-                <LuSquareArrowDown className="text-primary dark:text-primary-dark size-6"/>
-            </div>
-            
+            {
+              open === undefined &&
+              <div className="flex flex-row cursor-pointer items-center justify-center" onClick={() => setShow(!show)}>
+                  <input
+                      type="text"
+                      readOnly
+                      disabled
+                      value={format(selected, "dd.LL.yyyy", {locale: ru}) + ' ' + selected.toLocaleDateString("ru-RU", { weekday: 'short' }).toUpperCase()}
+                      className="rounded font-medium text-lg w-38 tracking-wider"/>
+                  <LuSquareArrowDown className="text-primary dark:text-primary-dark size-6"/>
+              </div>
+            }
 
             {show &&
                 createPortal(
                 <div
                     className="fixed inset-0 flex justify-center items-center bg-black/20 z-[9999]"
-                    onClick={() => setShow(false)}
+                    onClick={() => {
+                      if (setOpen !== undefined) {
+                        setOpen(false);
+                      }
+                      else {
+                        setShow(false);
+                      }
+                    }}
                 >
                     <div
                     onClick={(e) => e.stopPropagation()}
@@ -74,7 +91,7 @@ export default function Calendar({ ref, currentDate = new Date() }: CalendarProp
                             mode="single"
                             navLayout="around"
                             selected={selected}
-                            onSelect={value => { setSelected(value); ref(value); }}
+                            onSelect={value => { setSelected(value); onChange?.(value); }}
                             components={{
                                 MonthCaption: CustomCaptionComponent
                             }}

@@ -1,24 +1,24 @@
 import type { WeekHabit } from "@/api/diary";
 import type SavingProperties from "@/components/ui/common/saving";
-import { Checkbox, SortableCheckbox } from "./checkbox";
+import { Checkbox } from "./checkbox";
+import InlineEditableText from "./editableDiv";
+import type EditableProperties from "../common/editable";
 
-interface WeekHabitsProperties extends SavingProperties<WeekHabit> {
+interface WeekHabitsProperties extends SavingProperties<WeekHabit>, EditableProperties {
     
 }
 
-//<SortableCheckbox id={i} value={check} hasLabel={false} size={5} ></SortableCheckbox>
-
-export function WeekHabits({ loadedData, onSave }: WeekHabitsProperties) {
+export function WeekHabits({ loadedData, onSave, editable }: WeekHabitsProperties) {
     return (
         <>
             <div className="col-start-1 w-64">
-                {loadedData?.text}
+                <InlineEditableText initText={loadedData.text} onChange={ text => loadedData.text = text } editingAllow={editable} limit={30} classNames={{container: "h-7 w-full overflow-hidden", span: "h-5"}} />
             </div>
             {
-                loadedData?.checks.map((check, i) => {
+                loadedData.checks.map((check, i) => {
                     return (
-                        <div className={`col-start-${i + 2} items-center justify-center text-center`}>
-                            <Checkbox value={check} size={16} ></Checkbox>
+                        <div key={`div-${i}`} className={`col-start-${i + 2} items-center justify-center text-center`}>
+                            <Checkbox key={`checkbox-${i}`} onChange={(value) => loadedData.checks[i] = value } value={check} size={16} ></Checkbox>
                         </div>
                     );
                 })
@@ -37,13 +37,9 @@ function getWeekDays() {
 
     return (
         <>
-            <p className="col-start-2 text-center text-sm">пн</p>
-            <p className="col-start-3 text-center text-sm">вт</p>
-            <p className="col-start-4 text-center text-sm">ср</p>
-            <p className="col-start-5 text-center text-sm">чт</p>
-            <p className="col-start-6 text-center text-sm">пт</p>
-            <p className="col-start-7 text-center text-sm">сб</p>
-            <p className="col-start-8 text-center text-sm">вс</p>
+            {
+                weekdays.map((weekDay, i) => <p key={i} className={`col-start-${i + 2} text-center text-sm`}>{weekDay}</p>)
+            }
         </>
     );
 }

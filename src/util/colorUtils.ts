@@ -4,6 +4,7 @@ export const borderColors: Record<string, string> = {
   green: "border-t-green-200",
   lime: "border-t-lime-200",
   pink: "border-t-pink-200",
+  orange: "border-t-orange-200"
 };
 
 export const backgroundColors: Record<string, string> = {
@@ -12,6 +13,7 @@ export const backgroundColors: Record<string, string> = {
   green: "bg-green-50",
   lime: "bg-lime-50",
   pink: "bg-pink-50",
+  orange: "bg-orange-50"
 };
 
 export const backgroundColorsContrast: Record<string, string> = {
@@ -20,6 +22,7 @@ export const backgroundColorsContrast: Record<string, string> = {
   green: "bg-green-400",
   lime: "bg-lime-400",
   pink: "bg-pink-400",
+  orange: "bg-orange-400",
 };
 
 export const textColors: Record<string, string> = {
@@ -28,4 +31,5 @@ export const textColors: Record<string, string> = {
   green: "text-green-400",
   lime: "text-lime-400",
   pink: "text-pink-400",
+  orange: "text-orange-400",
 };
