@@ -16,7 +16,7 @@ interface ModalProperties {
     setOpen: (value: boolean) => void;
 }
 
-export default function DiaryResultModal({ header = '', children, onCancel, onSubmit, open, setOpen, submitText = 'ОК', cancelText = 'Отмена' }: ModalProperties) {
+export default function Modal({ header = '', children, onCancel, onSubmit, open, setOpen, submitText = 'ОК', cancelText = 'Отмена' }: ModalProperties) {
 
     return (
         <Dialog open={open} onClose={setOpen} className="relative z-50 text-primary dark:text-primary-dark">

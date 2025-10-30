@@ -14,34 +14,10 @@ export interface ObjectiveData {
     favorite: boolean;
     balanceType: Balance;
     date: Date;
-    completness: number;
     image_url?: string;
-}
-
-export const EMPTY_OBJECTIVE: ObjectiveData = {
-    id: 0,
-    label: 'Без названия',
-    text: '',
-    favorite: false,
-    balanceType: LifeBrightness,
-    date: new Date(),
-    completness: 0,
-    image_url: undefined
-}
-
-export function createEmptyObjectiveData() {
-    return (
-        {
-            id: 0,
-            label: 'Без названия',
-            text: '',
-            favorite: false,
-            balanceType: LifeBrightness,
-            date: new Date(),
-            completness: 0,
-            image_url: undefined
-        }   
-    )
+    completed: boolean;
+    goalsLabel: string;
+    goals: ObjectiveGoalData[];
 }
 
 export function getMission() {
@@ -92,38 +68,46 @@ export function getAllObjectives(): ObjectiveData[] {
         {
             id: 0,
             label: "Свадьба",
-            text: "Свадьба это рабство",
+            text: LOREM,
             favorite: true,
             balanceType: LifeBrightness,
             date: new Date(2026, 9, 20),
-            completness: 97
+            completed: false,
+            goalsLabel: "Без названия",
+            goals: []
         },
         {
             id: 1,
-            label: "Открыть свой магазин",
-            text: "Свадьба это рабство",
+            label: "Сделать открытие",
+            text: "Просто открытие",
             favorite: true,
             balanceType: LifeBrightness,
             date: new Date(2025, 11, 20),
-            completness: 11
+            completed: false,
+            goalsLabel: "Без названия",
+            goals: []
         },
         {
             id: 2,
             label: "Открыть свой магазин",
-            text: "Свадьба это рабство",
+            text: "Просто открыть свой магазин",
             favorite: false,
             balanceType: LifeBrightness,
             date: new Date(2025, 11, 20),
-            completness: 11
+            completed: false,
+            goalsLabel: "Без названия",
+            goals: []
         },
         {
             id: 3,
             label: "Прыгнуть с парашютом",
-            text: "Свадьба это рабство",
+            text: "Просто прыгнуть",
             favorite: true,
             balanceType: LifeBrightness,
             date: new Date(2026, 3, 20),
-            completness: 50
+            completed: false,
+            goalsLabel: "Без названия",
+            goals: []
         }
     ];
 }

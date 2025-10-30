@@ -3,22 +3,38 @@ import type SavingProperties from "@/components/ui/common/saving";
 import { Checkbox } from "./checkbox";
 import InlineEditableText from "./editableDiv";
 import type EditableProperties from "../common/editable";
+import { useEffect, useState } from "react";
 
-interface WeekHabitsProperties extends SavingProperties<WeekHabit>, EditableProperties {
-    
+interface WeekHabitChangedEvent {
+    checks: boolean[];
+    text: string;
 }
 
-export function WeekHabits({ loadedData, onSave, editable }: WeekHabitsProperties) {
+interface WeekHabitsProperties extends EditableProperties {
+    onChange?: (e: WeekHabitChangedEvent) => void;
+    initText: string;
+    initChecks: boolean[];
+}
+
+export function WeekHabits({ initText, initChecks, onChange, editable }: WeekHabitsProperties) {
+
+    const [checks, setChecks] = useState<boolean[]>(initChecks);
+    const [text, setText] = useState<string>(initText);
+
+    useEffect(() => {
+        onChange?.({ checks: checks, text: text });
+    }, [checks, text]);
+
     return (
         <>
             <div className="col-start-1 w-64">
-                <InlineEditableText initText={loadedData.text} onChange={ text => loadedData.text = text } editingAllow={editable} limit={30} classNames={{container: "h-7 w-full overflow-hidden", span: "h-5"}} />
+                <InlineEditableText initText={initText} onChange={ text => setText(text) } editingAllow={editable} limit={30} classNames={{container: "h-7 w-full overflow-hidden", span: "h-5"}} />
             </div>
             {
-                loadedData.checks.map((check, i) => {
+                checks.map((check, i) => {
                     return (
                         <div key={`div-${i}`} className={`col-start-${i + 2} items-center justify-center text-center`}>
-                            <Checkbox key={`checkbox-${i}`} onChange={(value) => loadedData.checks[i] = value } value={check} size={16} ></Checkbox>
+                            <Checkbox key={`checkbox-${i}`} onChange={value => setChecks(checks.map((oldValue, index) => index == i ? value : oldValue)) } value={check} size={16} ></Checkbox>
                         </div>
                     );
                 })

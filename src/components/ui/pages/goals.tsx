@@ -1,6 +1,5 @@
 import TextHeader from "@/components/ui/elements/text-header";
 import InlineEditableText from "../elements/editableDiv";
-import { ALL_OBJECTIVES, createEmptyObjectiveData, EMPTY_OBJECTIVE, getAllObjectives, getFocusedObjectives, getMission, saveMission, type ObjectiveData } from "@/api/objective";
 import { BsStarFill } from "react-icons/bs";
 import { BsStar } from "react-icons/bs";
 import { FaCheck, FaRegTrashAlt } from "react-icons/fa";
@@ -14,37 +13,32 @@ import BlockInput from "../blocks/blockInput";
 import { useEffect, useRef, useState } from "react";
 import Sticker from "../elements/sticker";
 import { CiCirclePlus } from "react-icons/ci";
-import DiaryResultModal from "../unused/diaryResultModal";
-import sticker_image from "@/assets/sticker_image.jpg"
+import Modal from "@/components/ui/elements/modal";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { backgroundColors, backgroundColorsContrast, textColors } from "@/util/colorUtils";
+import { backgroundColorsContrast, textColors } from "@/util/colorUtils";
 import { ChevronRight } from "lucide-react";
 import { BalanceTypes, type Balance } from "@/util/balanceWheel";
 import Calendar from "../elements/calendar";
-
-interface Objective {
-    id: number;
-    imageFile?: File;
-    label: string;
-    text: string;
-    favorite: boolean;
-    balanceType: Balance;
-    date: Date;
-    completness: number;
-}
+import useObjectivesController, { type RawObjectiveData } from "@/components/controller/objectivesController";
+import useDidUpdateEffect from "@/util/useDidUpdateEffect";
+import type { ObjectiveGoalData } from "@/api/objective";
+import { GoPlus } from "react-icons/go";
+import { reserveID } from "@/util/uniqueObject";
+import { Checkbox, SortableCheckbox } from "../elements/checkbox";
 
 interface ObjectiveModalProperties {
-    loadedData: ObjectiveData; 
     openModal: boolean;
-    allowFavorite: boolean;
     setOpenModal: (value: boolean) => void;
-    onSubmit: (newValue: Objective) => void;
-    onEditEnd: (newValue: Objective) => void;
-    onDelete: (id: number) => void;
 }
 
-export function ObjectiveModal({ loadedData, openModal, setOpenModal, onEditEnd, onSubmit, onDelete, allowFavorite }: ObjectiveModalProperties) {
+export function ObjectiveModal({ openModal, setOpenModal }: ObjectiveModalProperties) {
+
+    const loadedData = useObjectivesController((state) => state.selectedObjective);
+    const modifyObjective = useObjectivesController((state) => state.modifyObjective);
+    const isAllowedFavorite = useObjectivesController((state) => state.isAllowedFavorite);
+    const removeObjective = useObjectivesController((state) => state.removeObjective);
+    const addEmptyObjectiveGoal = useObjectivesController((state) => state.addEmptyObjectiveGoal);
 
     const [editable, setEditable] = useState<boolean>(false);
     const listRef = useRef<HTMLDivElement>(null);
@@ -53,17 +47,42 @@ export function ObjectiveModal({ loadedData, openModal, setOpenModal, onEditEnd,
     const [label, setLabel] = useState<string>(loadedData.label);
     const [favorite, setFavorite] = useState<boolean>(loadedData.favorite);
     const [text, setText] = useState<string>(loadedData.text);
+    const [goalsLabel, setGoalsLabel] = useState<string>(loadedData.goalsLabel);
     const [balance, setBalance] = useState<Balance>(loadedData.balanceType);
     const [date, setDate] = useState<Date>(loadedData.date);
-    const [completness, setCompletness] = useState<number>(loadedData.completness);
+    const [completed, setCompleted] = useState<boolean>(loadedData.completed);
+
+    const [goals, setGoals] = useState<ObjectiveGoalData[]>(loadedData.goals);
 
     const [showCalendar, setShowCalendar] = useState<boolean>(false);
 
     const [showenList, setShowenList] = useState<boolean>(false);
 
-    const gatherData = (): Objective => {
-        return { id: loadedData.id, imageFile: uploadedImage, label: label, text: text, favorite: favorite, balanceType: balance, date: date, completness: completness };
+    const gatherData = (): RawObjectiveData => {
+        return { imageFile: uploadedImage, label: label, text: text, favorite: favorite, balanceType: balance, date: date, completed: completed, goalsLabel: goalsLabel, goals: [] };
     }
+
+    const calcGoalsPercent = (): number => {
+        var allGoals = goals.length;
+        var completedGoals = goals.filter(data => data.completed).length;
+
+        if (allGoals == 0) {
+            return 100;
+        }
+
+        return completedGoals / allGoals;
+    }
+
+    useEffect(() => {
+        setLabel(loadedData.label);
+        setFavorite(loadedData.favorite);
+        setText(loadedData.text);
+        setBalance(loadedData.balanceType);
+        setDate(loadedData.date);
+        setCompleted(loadedData.completed);
+        setGoalsLabel(loadedData.goalsLabel);
+        setGoals(loadedData.goals);
+    }, [loadedData])
 
     useEffect(() => {
         if (showenList) {
@@ -72,23 +91,14 @@ export function ObjectiveModal({ loadedData, openModal, setOpenModal, onEditEnd,
     }, [showenList]);
 
     useEffect(() => {
-        if (!editable) {
-            onEditEnd(gatherData());
+        if (!editable && openModal) {
+            modifyObjective(loadedData.id, gatherData());
         }
     }, [editable]);
 
-    useEffect(() => {
-        onEditEnd(gatherData());
-    }, [balance, favorite]);
-
-    useEffect(() => {
-        setLabel(loadedData.label);
-        setFavorite(loadedData.favorite);
-        setText(loadedData.text);
-        setBalance(loadedData.balanceType);
-        setDate(loadedData.date);
-        setCompletness(loadedData.completness);
-    }, [loadedData]);
+    useDidUpdateEffect(() => {
+        modifyObjective(loadedData.id, gatherData());
+    }, [balance, favorite, completed]);
 
     useEffect(() => {
         if (openModal) {
@@ -98,12 +108,12 @@ export function ObjectiveModal({ loadedData, openModal, setOpenModal, onEditEnd,
     }, [openModal]);
 
     return (
-        <DiaryResultModal open={openModal} setOpen={setOpenModal} submitText='Сделано' cancelText='' >
+        <Modal open={openModal} setOpen={setOpenModal} onSubmit={ () => setCompleted(!completed) } submitText={ `${ completed ? 'Не сделано' : 'Сделано' }` } cancelText='' >
             <div className="flex flex-col relative">
                 <div className="flex flex-row">
                     <TextHeader text={ `${ label }` } />
                     <div className="flex flex-row ml-auto space-x-3">
-                        <button className={ `ml-auto cursor-pointer` } onClick={ () => {if (allowFavorite || favorite) setFavorite(!favorite) }}>
+                        <button className={ `ml-auto cursor-pointer` } onClick={ () => {if (isAllowedFavorite() || favorite) setFavorite(!favorite) }}>
                             {
                                 favorite ? <BsStarFill/> : <BsStar/>
                             }
@@ -115,7 +125,7 @@ export function ObjectiveModal({ loadedData, openModal, setOpenModal, onEditEnd,
                                 <MdOutlineEdit className='size-5'/>
                             }
                         </button>
-                        <button className='cursor-pointer' onClick={ () => { setOpenModal(false); onDelete(loadedData.id); } }>
+                        <button className='cursor-pointer' onClick={ () => { setOpenModal(false); removeObjective(loadedData.id); } }>
                             <FaRegTrashAlt/>
                         </button>
                         <button className='cursor-pointer' onClick={() => setOpenModal(false)}>
@@ -141,27 +151,40 @@ export function ObjectiveModal({ loadedData, openModal, setOpenModal, onEditEnd,
                     } 
                 </div>
                 <div className="flex flex-row pt-5 items-start space-x-2">
-                    <MdOutlineSegment className='size-5 rotate-z-180 rotate-x-180' />
-                    <div className="-mt-0.5">
-                        <InlineEditableText initText={text} onChange={ newText => setText(newText) } editingAllow={editable} />
+                    <MdOutlineSegment className='size-5 rotate-z-180 rotate-x-180 shrink-0' />
+                    <div className="-mt-0.5 w-full pr-5">
+                        <InlineEditableText wrap classNames={{ container: "w-full", span: "w-full wrap-text whitespace-pre-line" }} initText={ text } onChange={ newText => setText(newText) } editingAllow={editable} />
                     </div>
                 </div>
-                <div onClick={ () => { if (editable) setShowCalendar(true) } } className="flex flex-row pt-5 items-start space-x-2">
+                <div className="flex flex-row pt-5 items-start space-x-2">
                     <HiClock className='size-5' />
                     <div className="-mt-0.5">
-                        <p>
+                        <p className={ `${editable && 'cursor-pointer'}` } onClick={ () => { if (editable) setShowCalendar(true) } }>
                             { `${date.toLocaleDateString("ru-RU", { weekday: 'long' }).replace(/^./, (ch) => ch.toUpperCase())}, ${format(date, "d MMMM", {locale: ru})}` }
                         </p>
                     </div>
                 </div>
-                { /*TODO*/ }
                 <div className="flex flex-row pt-10 items-start space-x-2"> 
                     <img alt="check_image" src={Check} />
                     <div className="-mt-0.5">
-                        <p>
-                            Название
-                        </p>
+                        <InlineEditableText initText={ goalsLabel } onChange={ setGoalsLabel } editingAllow={ editable } />
                     </div>
+                </div>
+                <div className="flex flex-row items-center space-x-2 pt-2"> 
+                    <p className="text-sm items-center">
+                        { `${calcGoalsPercent()}%` }
+                    </p>
+                    <div className="bg-inactive w-full h-2 my-auto rounded-lg">
+                        <div style={{ width: `${ calcGoalsPercent() }%` }} className="bg-active-bar-dark h-2 my-auto rounded-lg" />
+                    </div>
+                    <button className="cursor-pointer" onClick={ () => addEmptyObjectiveGoal(loadedData.id) }>
+                        <GoPlus className="size-5"/>
+                    </button>
+                </div>
+                <div className="flex flex-col">
+                    {
+                        loadedData.goals.map(data => <SortableCheckbox id={data.id} />)
+                    }
                 </div>
 
                 <div onClick={ () => setShowenList(true) } className="flex mt-15 hover:bg-brand-active h-10 items-center rounded-sm w-full cursor-pointer px-2">
@@ -188,35 +211,21 @@ export function ObjectiveModal({ loadedData, openModal, setOpenModal, onEditEnd,
                 }
             </div>
             <Calendar currentDate={date} open={showCalendar} setOpen={setShowCalendar} onChange={ date => setDate(date) } />
-        </DiaryResultModal>
+        </Modal>
     );
 }
 
 export default function Goals() {
 
-    const [objectives, setObjectives] = useState<ObjectiveData[]>(getAllObjectives());
+    const objectives = useObjectivesController((state) => state.objectives);
+    const mission = useObjectivesController((state) => state.mission);
+
+    const setMission = useObjectivesController((state) => state.setMission);
+    const addEmptyObjective = useObjectivesController((state) => state.addEmptyObjective);
+    const getFavorites = useObjectivesController((state) => state.getFavorites);
+    const selectObjective = useObjectivesController((state) => state.selectObjective);
 
     const [openModal, setOpenModal] = useState<boolean>(false);
-    const [currentObjective, setCurrentObjective] = useState<ObjectiveData>(createEmptyObjectiveData());
-
-    const [rerender, setRerender] = useState<boolean>(false);
-
-    const reserveObjectiveID = () => {
-        var sorted = objectives.sort((a, b) => a.id - b.id);
-
-        if (sorted.length > 0) {
-            return sorted[sorted.length - 1].id + 1;
-        }
-
-        return 0;
-    }
-
-    const onAdd = (monthOffset: 1 | 5 | 11) => {
-        var emptyData = createEmptyObjectiveData();
-        emptyData.id = reserveObjectiveID();
-        emptyData.date.setMonth(emptyData.date.getMonth() + monthOffset);
-        setObjectives([...objectives, emptyData]);
-    }
 
     const createListByMonths = (col: number, startLimit: number, endLimit: number) => {
                                     return objectives.filter(goal => {
@@ -226,18 +235,18 @@ export default function Goals() {
                                         end.setMonth(end.getMonth() + endLimit);
 
                                         return goal.date >= now && goal.date <= end;
-                                    }).map((goal, i) => <Sticker key={ `sticker-${col}-${i}` } onClick={data => { setCurrentObjective(data); setOpenModal(true); } } classNames={{container: `col-start-${col} mx-auto row-start-${i + 2}`}} loadedData={ goal } />)
+                                    }).map((goal, i) => <Sticker key={ `sticker-${col}-${i}` } onClick={data => { selectObjective(data); setOpenModal(true); } } classNames={{container: `col-start-${col} mx-auto row-start-${i + 2}`}} loadedData={ goal } />)
                                 }
 
-    return (
+    return ( 
         <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 h-full grid-rows-[auto_1fr]">
                 <div className="relative bg-brand dark:bg-brand-dark p-6 rounded-lg md:col-span-3 h-50 md:h-fit overflow-hidden">
                     <div className="flex-row items-center space-x-10 hidden md:flex">
                         <TextHeader text="Миссия" />
-                        <InlineEditableText initText={ getMission() } onChange={ text => saveMission(text) } classNames={ { container: 'w-full overflow-x-hidden', input: 'text-nowrap w-full', span: 'w-full truncate whitespace-nowrap' } } />
+                        <InlineEditableText limit={100} initText={ mission } onChange={ text => setMission(text) } classNames={ { container: 'w-full overflow-x-hidden', input: 'text-nowrap w-full', span: 'w-full truncate whitespace-nowrap' } } />
                     </div>
-                    <BlockInput header="Миссия" loadedData={ getMission() } onSave={ text => saveMission(text) } classNames={{ block: "md:hidden" }} />
+                    <BlockInput header="Миссия" initText={ mission } onChange={ text => setMission(text) } classNames={{ block: "md:hidden" }} />
                 </div>
                 <div className="relative bg-brand dark:bg-brand-dark p-6 rounded-lg overflow-hidden md:col-span-3 h-full">
                     <div className="flex flex-row items-start h-full overflow-auto">
@@ -248,7 +257,7 @@ export default function Goals() {
                                     createListByMonths(1, 0, 2)
                                 }
                                 <button className="col-start-1 mx-auto mb-auto cursor-pointer">
-                                    <CiCirclePlus className="size-12" onClick={() => onAdd(1)}/>
+                                    <CiCirclePlus className="size-12" onClick={() => addEmptyObjective(1)}/>
                                 </button>
                             </div>
                             <div className="flex flex-col gap-4">
@@ -257,7 +266,7 @@ export default function Goals() {
                                     createListByMonths(2, 2, 6)
                                 }
                                 <button className="col-start-2 mx-auto mb-auto cursor-pointer">
-                                    <CiCirclePlus className="size-12" onClick={() => onAdd(5)}/>
+                                    <CiCirclePlus className="size-12" onClick={() => addEmptyObjective(5)}/>
                                 </button>
                             </div>
                             <div className="flex flex-col gap-4">
@@ -266,7 +275,7 @@ export default function Goals() {
                                     createListByMonths(3, 6, 12)
                                 }
                                 <button className="col-start-3 mx-auto mb-auto cursor-pointer">
-                                    <CiCirclePlus className="size-12" onClick={() => onAdd(11)}/>
+                                    <CiCirclePlus className="size-12" onClick={() => addEmptyObjective(11)}/>
                                 </button>
                             </div>
 
@@ -279,7 +288,7 @@ export default function Goals() {
                     <TextHeader text="Цели в фокусе" />
                     <div className="flex flex-col pt-5 space-y-5">
                         {
-                            objectives.filter(objective => objective.favorite).map(data => {
+                            getFavorites().map(data => {
                                 return (
                                     <div key={ `focused-objective-${data.id}` } className="flex flex-row space-x-5 items-start">
                                         <BsStarFill className={`mt-0.5 min-h-5 min-w-5 size-5 ${textColors[data.balanceType.color]}`} />
@@ -292,19 +301,7 @@ export default function Goals() {
                     </div>
                 </div>
             </div>
-            <ObjectiveModal allowFavorite={ objectives.filter(objective => objective.favorite).length < 3 } onSubmit={ () => {} } onDelete={ id => setObjectives(objectives.filter(data => data.id != id)) } loadedData={currentObjective} openModal={openModal} setOpenModal={setOpenModal} onEditEnd={data => { 
-                objectives.filter(value => value.id == data.id).forEach(value => {{
-                    value.balanceType = data.balanceType;
-                    value.completness = data.completness;
-                    value.date = data.date;
-                    value.favorite = data.favorite;
-                    value.label = data.label;
-                    value.text = data.text;
-                
-                }
-            });
-                setRerender(!rerender)
-            }} />
+            <ObjectiveModal openModal={ openModal } setOpenModal={ setOpenModal } />
         </>
     );
 }

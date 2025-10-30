@@ -13,19 +13,30 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ControllableHeader } from '@/components/ui/elements/text-header';
 
 import { SortableCheckbox } from '@/components/ui/elements/checkbox';
-import { getRites, saveRites, type RiteData } from '@/api/diary';
+import useRitesController from '@/components/controller/ritesController';
 import type { SortableItem } from '@/util/sortable';
+import type { RiteData } from '@/api/diary';
 
-interface RitesListProperties {
-    className?: string;
+interface BlockRitesClassNames {
+    container: string;
 }
 
-export default function BlockRitesList({ className = '' }: RitesListProperties) {
-    const [rites, setRites] = useState<SortableItem<RiteData>[]>(getRites().sort((a, b) => a.sort_order - b.sort_order).map((rite, i) => { return { id: i, content: rite }; }).slice(0, 10));
+interface BlockRitesListProperties {
+    classNames?: BlockRitesClassNames;
+}
+
+export default function BlockRitesList({ classNames }: BlockRitesListProperties) {
+    const rites = useRitesController(state => state.rites);
+
+    const modifyRite = useRitesController(state => state.modifyRite);
+    const removeRite = useRitesController(state => state.removeRite);
+    const setRites = useRitesController(state => state.setRites);
+    const addEmptyRite = useRitesController(state => state.addEmptyRite);
+    
     const [editable, setEditable] = useState<boolean>(false);
 
     const sensors = useSensors(
@@ -43,32 +54,28 @@ export default function BlockRitesList({ className = '' }: RitesListProperties) 
         })
     );
 
-    useEffect(() => {
-        saveRites(rites.map<RiteData>(rite => rite.content));
-    }, [rites]);
-
     function handleDragEnd(event: any) {
         const {active, over} = event;
         
         if (active.id !== over.id) {
-            setRites(goals => {
-                const oldIndex = goals.findIndex(rite => rite.id == active.id);
-                const newIndex = goals.findIndex(rite => rite.id == over.id);
-                
-                return arrayMove(goals, oldIndex, newIndex).map((item, index) => (
-                    {
-                        ...item,
-                        sort_order: 1 + index
-                    }
-                ));
-            });
+            const oldIndex = rites.findIndex(rite => rite.id == active.id);
+            const newIndex = rites.findIndex(rite => rite.id == over.id);
+
+            var array = arrayMove(rites, oldIndex, newIndex).map((data, i) => (
+                {
+                    ...data,
+                    sort_order: i + 1
+                }
+            ));
+            
+            setRites(array);
         }
     }
 
     return (
         <>
-            <div className={`flex flex-col min-h-0 ${className}`}>
-                <ControllableHeader text='Утренние ритуалы' editable={editable} setEditable={setEditable}/>
+            <div className={`flex flex-col min-h-0 ${classNames?.container}`}>
+                <ControllableHeader text='Утренние ритуалы' editable={editable} onAdd={ addEmptyRite } setEditable={setEditable}/>
                     <div className={`flex-1 my-10 relative overflow-y-scroll overflow-x-clip ${ editable && 'touch-none' }`}>
                         <DndContext
                             sensors={sensors}
@@ -79,7 +86,7 @@ export default function BlockRitesList({ className = '' }: RitesListProperties) 
                                 items={rites.map(rite => rite.id)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {rites.map(rite => <SortableCheckbox disabled={!editable} className='mb-5' onChange={data => { rite.content.completed = data.value; rite.content.text = data.text; saveRites(rites.map(rite => rite.content));}} value={rite.content.completed} key={rite.id} id={rite.id} initText={rite.content.text} />)}
+                                {rites.map(rite => <SortableCheckbox onDelete={ () => { removeRite(rite.id)  } } disabled={!editable} className='mb-5' onChange={data => { console.log(`${data.value} and ${data.text}`); modifyRite(rite.id, { ...rite, completed: data.value, text: data.text });}} value={rite.completed} key={`rite-${rite.id}`} id={rite.id} initText={rite.text} />)}
                             </SortableContext>
                         </DndContext>
                     </div>
@@ -88,9 +95,3 @@ export default function BlockRitesList({ className = '' }: RitesListProperties) 
         </>
     )
 }
-
-/*
-                <div className='flex-1 pt-5 pb-5 min-h-0'>
-
-                </div>
-*/

@@ -9,10 +9,12 @@ interface BlockInputClassNames {
     block?: string;
 }
 
-interface BlockInputProperties extends SavingProperties<string> {
+interface BlockInputProperties {
     header: string;
     children?: JSX.Element;
     classNames?: BlockInputClassNames;
+    initText?: string;
+    onChange?: (text: string) => void;
 }
 
 interface BlockInputControllableProperties extends BlockInputProperties {
@@ -20,12 +22,12 @@ interface BlockInputControllableProperties extends BlockInputProperties {
     outerEditable?: boolean;
 }
 
-export function BlockInputControllable({ header, loadedData = '', children, onSave, outerControl }: BlockInputControllableProperties) {
-    const [text, setText] = useState<string>(loadedData);
+export function BlockInputControllable({ header, initText = '', children, onChange, outerControl }: BlockInputControllableProperties) {
+    const [text, setText] = useState<string>(initText);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
-        onSave?.(text);
+        onChange?.(text);
     }, [text]);
 
     return (
@@ -46,9 +48,9 @@ export function BlockInputControllable({ header, loadedData = '', children, onSa
     )
 }
 
-export default function BlockInput({ header, loadedData = '', children, onSave, outerControl = false, outerEditable = false, classNames = { textarea: '', paragraph: '', container: '' }}: BlockInputControllableProperties) {
+export default function BlockInput({ header, initText = '', children, onChange, outerControl = false, outerEditable = false, classNames = { textarea: '', paragraph: '', container: '' }}: BlockInputControllableProperties) {
     const [editable, setEditable] = useState<boolean>(false);
-    const [text, setText] = useState<string>(loadedData);
+    const [text, setText] = useState<string>(initText);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
     const isEditMode = () => editable || outerEditable;
@@ -65,13 +67,13 @@ export default function BlockInput({ header, loadedData = '', children, onSave, 
             {
                 outerControl ?
                 <TextHeader text={header} /> :
-                <ControllableHeader text={header} editable={editable} setEditable={setEditable} onDone={ () => onSave?.(text) } />
+                <ControllableHeader text={header} editable={editable} setEditable={setEditable} onDone={ () => onChange?.(text) } />
             }
             {
                 <div className={`flex flex-row relative box-border overflow-y-auto overflow-x-clip h-full min-h-0 mt-1 ${classNames.container}`}>
                     {
                         isEditMode() ?
-                        <textarea onBlur={ () => { if (!outerControl) setEditable(false); onSave?.(text); } } ref={textAreaRef} value={ text } onChange={ value => setText(value.target.value) } className={ `block border-active-bar dark:border-active-bar-dark border-2 p-2 outline-0 rounded-lg w-full h-full box-border shadow-inner resize-none text-wrap break-all ${ children && 'mr-5' } ${classNames.textarea}` }/> :
+                        <textarea onBlur={ () => { if (!outerControl) setEditable(false); onChange?.(text); } } ref={textAreaRef} value={ text } onChange={ value => setText(value.target.value) } className={ `block border-active-bar dark:border-active-bar-dark border-2 p-2 outline-0 rounded-lg w-full h-full box-border shadow-inner resize-none text-wrap break-all ${ children && 'mr-5' } ${classNames.textarea}` }/> :
                         <p className={ `block box-border whitespace-pre-line h-10 overflow-y-visible pr-5 w-full text-wrap min-h-0 break-all ${classNames.paragraph}` }>
                             { text }
                         </p>

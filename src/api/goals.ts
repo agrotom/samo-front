@@ -1,7 +1,8 @@
+import type UniqueObject from "@/util/uniqueObject";
 import { getUser } from "./auth";
 import { LOREM } from "./diary";
 
-export interface GoalData {
+export interface GoalData extends UniqueObject {
     id: number;
     completed: boolean;
     text: string;

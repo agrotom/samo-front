@@ -1,38 +1,48 @@
 import Sticker from "@/components/ui/elements/sticker";
 
 import BlockGoalsList from "@/components/ui/blocks/blockGoalsList";
-import { getFocus, getInsight } from "@/api/diary";
 import BlockText from "@/components/ui/blocks/blockText";
 import BlockTracker from "@/components/ui/blocks/blockTracker";
 import BottomImage from "@/assets/bottom_image_left.svg";
 import CornerImage from "@/assets/corner_image.svg";
-import { getFocusedObjectives } from "@/api/objective";
+import { ObjectiveModal } from "./goals";
+import { useState } from "react";
+import useObjectivesController from "@/components/controller/objectivesController";
+import useDiaryController from "@/components/controller/diaryController";
 
 export default function Home() {
-    
+
+    const favoriteObjectives = useObjectivesController(state => state.objectives);
+    const selectObjective = useObjectivesController(state => state.selectObjective);
+
+    const focusText = useDiaryController(state => state.focusText);
+    const insightText = useDiaryController(state => state.insightText);
+
+    const [openModal, setOpenModal] = useState<boolean>(false);
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div className="relative bg-brand dark:bg-brand-dark p-6 rounded-lg h-50 overflow-hidden">
                 <img src={CornerImage} className="absolute rotate-y-180 top-0 -left-3 w-full pointer-events-none hidden lg:block" />
-                <BlockText header="Фокус" loadedData={ getFocus() } />
+                <BlockText header="Фокус дня" initText={ focusText } />
             </div>
             <div className="relative bg-brand dark:bg-brand-dark p-6 rounded-lg h-50 overflow-hidden">
-                <BlockText header="Инсайт" loadedData={ getInsight() } />
+                <BlockText header="Инсайт" initText={ insightText } />
             </div>
             <div className="relative flex flex-col bg-brand dark:bg-brand-dark p-6 md:row-span-3 h-full overflow-hidden rounded-lg">
                 <img src={BottomImage} className="absolute rotate-y-180 left-0 bottom-0 pointer-events-none hidden lg:block" />
                 <BlockGoalsList />
             </div>
-            <div className="relative bg-brand dark:bg-brand-dark p-6 rounded-lg md:col-span-2 md:col-start-1 overflow-hidden h-100 md:h-fit">
+            <div className="relative bg-brand dark:bg-brand-dark p-6 pb-10 rounded-lg md:col-span-2 md:col-start-1 overflow-hidden h-100 md:h-fit">
                 <img src={BottomImage} className="absolute rotate-y-180 left-0 -bottom-10 pointer-events-none hidden lg:block" />
                 <BlockTracker />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-30 md:col-span-2">
                 {
-                    getFocusedObjectives().map(data => <Sticker key={`sticker-${data.id}`} loadedData={ data } />)
+                    favoriteObjectives.filter(data => data.favorite).map(data => <Sticker onClick={ data => { selectObjective(data); setOpenModal(true); } } key={`sticker-${data.id}`} loadedData={ data } />)
                 }
             </div>
+            <ObjectiveModal openModal={ openModal } setOpenModal={ setOpenModal } />
         </div>
     )
 }

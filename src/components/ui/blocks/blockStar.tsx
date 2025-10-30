@@ -1,15 +1,22 @@
-import { getTodayDeeds, getTomorrowMainTasks, saveTodayDeeds, saveTomorrowMainTasks, type TodayDeeds } from "@/api/diary";
+import { type TodayDeeds } from "@/api/diary";
 import { useEffect, useRef, useState } from "react";
-import { FaStar, FaRegStar } from "react-icons/fa";
+import { FaStar, FaRegStar, FaRegTrashAlt } from "react-icons/fa";
 import { ControllableHeader } from "@/components/ui/elements/text-header";
 import InlineEditableText from "@/components/ui/elements/editableDiv";
 import BlockInput from "./blockInput";
 import { clamp } from "@/util/math";
-import type SavingProperties from "@/components/ui/common/saving";
-import { type SaveFuncType } from "@/components/ui/common/saving";
+import useStarsController from "@/components/controller/starsController";
 
-interface StarLabelProperties extends SavingProperties<TodayDeeds> {
-    onSave?: SaveFuncType<TodayDeeds>;
+interface StarLabelChangedEvent {
+    text: string;
+    level: number;
+}
+
+interface StarLabelProperties {
+    initLevel: number;
+    initText: string;
+    onChange?: (data: StarLabelChangedEvent) => void;
+    onDelete?: () => void;
     readonly?: boolean;
     editable?: boolean;
 }
@@ -34,21 +41,19 @@ function Star({ isActive = false, onClick}: StarProperties) {
     );
 }
 
-export function StarLabel({loadedData, onSave, readonly = false, editable = false}: StarLabelProperties) {
+export function StarLabel({initLevel, initText, onChange, readonly = false, editable = false, onDelete }: StarLabelProperties) {
 
-    const [level, setLevel] = useState<number>(clamp(loadedData.level, 0, 3));
-    const text = useRef<string>(loadedData.text.slice(0, 30));
+    const [level, setLevel] = useState<number>(clamp(initLevel, 0, 3));
+    const [text, setText] = useState<string>(initText.slice(0, 30));
 
     useEffect(() => {
-        loadedData.level = level;
-        loadedData.text = text.current;
-        onSave?.(loadedData);
-    }, [level]); //<div className="flex flex-row items-center"> <p className="text-wrap break-all">{text}</p>
+        onChange?.({ text: text, level: level });
+    }, [level, text]);
 
     return (
         <>
-            <div className="col-start-1 h-6">
-                <InlineEditableText initText={text.current} limit={30} onChange={ data => { loadedData.text = data; onSave?.(loadedData); } } editingAllow={editable}/>
+            <div className="col-start-1 h-6 flex my-auto">
+                <InlineEditableText initText={ text } limit={30} onChange={ setText } editingAllow={editable}/>
             </div>
             <div className="cols-start-2 flex flex-row">
                 <Star isActive={level > 0} onClick={() => {
@@ -87,41 +92,39 @@ export function StarLabel({loadedData, onSave, readonly = false, editable = fals
                         setLevel(2);
                     }
                 }}/>
+                <button className={ `cursor-pointer ml-auto mr-5 ${ !editable && 'hidden' }` } onClick={ onDelete }>
+                    <FaRegTrashAlt/>
+                </button>
             </div>
         </>
     );
 }
 
 export default function BlockStar() {
-    const [todayDeeds, setTodayDeeds] = useState<TodayDeeds[]>(getTodayDeeds());
+
+    const tomorrowMainTasksText = useStarsController(state => state.tomorrowMainTasksText);
+    const setTomorrowMainTasksText = useStarsController(state => state.setTomorrowMainTasksText);
+
+    const todayDeeds = useStarsController(state => state.todayDeeds); 
+    const addEmptyTodayDeed = useStarsController(state => state.addEmptyTodayDeed); 
+    const modifyTodayDeed = useStarsController(state => state.modifyTodayDeed); 
+    const removeTodayDeed = useStarsController(state => state.removeTodayDeed); 
+
     const [editable, setEditable] = useState<boolean>(false);
-
-    const reserveTodayDeedsID = () => {
-        var sorted = todayDeeds.sort((a, b) => a.id - b.id);
-        if (sorted.length > 0) {
-            return sorted[sorted.length - 1].id;
-        }
-
-        return 0;
-    }
-
-    useEffect(() => {
-        saveTodayDeeds(todayDeeds);
-    }, [todayDeeds]);
 
     return (
 
         <div className="flex flex-col h-full">
-            <ControllableHeader text="Что было сегодня сделано" onAdd={ () => setTodayDeeds([...todayDeeds, { id: reserveTodayDeedsID(), text: "Без названия", level: 0 }]) } editable={editable} setEditable={setEditable} />
+            <ControllableHeader text="Что было сегодня сделано" onAdd={ addEmptyTodayDeed } editable={editable} setEditable={setEditable} />
             <div className="grid grid-cols-2 grid-rows-1 mt-2 auto-rows-min">
                 <p className="col-start-2 text-sm">Важность</p>
             </div>
             <div className="grid grid-cols-2 h-[128px] overflow-y-scroll mb-5">
                 {
-                    todayDeeds.map(data => <StarLabel key={data.id} onSave={() => saveTodayDeeds(todayDeeds)} editable={editable} loadedData={data}/>)
+                    todayDeeds.map(data => <StarLabel key={ data.id } initText={ data.text } initLevel={ data.level } onChange={ e => modifyTodayDeed(data.id, { ...data, text: e.text, level: e.level }) } editable={editable} onDelete={ () => { removeTodayDeed(data.id) } } />)
                 }
             </div>
-            <BlockInput header="Главные задачи на завтра" loadedData={getTomorrowMainTasks()} onSave={data => saveTomorrowMainTasks(data)} outerEditable={editable} outerControl classNames={
+            <BlockInput header="Главные задачи на завтра" initText={ tomorrowMainTasksText } onChange={ data => setTomorrowMainTasksText(data) } outerEditable={editable} outerControl classNames={
                 {
                     container: "lg:mr-70"
                 }

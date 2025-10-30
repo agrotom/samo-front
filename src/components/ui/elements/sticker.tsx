@@ -2,23 +2,24 @@ import { BsStarFill } from "react-icons/bs";
 import { BsStar } from "react-icons/bs";
 import { HiClock } from "react-icons/hi2";
 import Check from "@/assets/check.svg"
-import sticker_image from "@/assets/sticker_image.jpg"
 import { format } from "date-fns";
 import type SavingProperties from "../common/saving";
 import type { ObjectiveData } from "@/api/objective";
 import { backgroundColors, borderColors } from "@/util/colorUtils";
+import { calculateCompleteness } from "@/util/objectives";
 
 
 interface StickerClassNames {
     container?: string;
 }
 
-interface StickerProperties extends SavingProperties<ObjectiveData> {
+interface StickerProperties {
+    loadedData: ObjectiveData;
     onClick?: (data: ObjectiveData) => void;
     classNames?: StickerClassNames;
 }
 
-export default function Sticker({ loadedData, onSave, classNames = { container: '' }, onClick }: StickerProperties) {
+export default function Sticker({ loadedData, classNames = { container: '' }, onClick }: StickerProperties) {
     return (
         <>
             <div onClick={ () => onClick?.(loadedData) } className={`w-full p-3 border-t-4 rounded-b-2xl ${borderColors[loadedData.balanceType.color]} ${backgroundColors[loadedData.balanceType.color]} cursor-pointer md:w-62 lg:w-64 ${classNames.container}`}>
@@ -34,7 +35,7 @@ export default function Sticker({ loadedData, onSave, classNames = { container: 
                     </div>
                     <div className='flex flex-row w-fit p-1.5 items-center justify-center ml-5'>
                         <img src={Check}/>
-                        <p className='ml-2 text-sm'>{loadedData.completness + '%'}</p>
+                        <p className='ml-2 text-sm'>{calculateCompleteness(loadedData) + '%'}</p>
                     </div>
                 </div>
                 {

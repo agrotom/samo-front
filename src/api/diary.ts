@@ -1,22 +1,21 @@
+import type UniqueObject from "@/util/uniqueObject";
 import { getUser } from "./auth";
 import type { TrackerData } from "./trackers";
 
 export const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et tincidunt nulla. Vivamus sed mi vitae ante tempor mattis non sit amet orci. Quisque id justo tortor. Donec vel diam dignissim, cursus ligula quis, fermentum sapien. Etiam a imperdiet eros, vel aliquam elit. Pellentesque gravida dignissim lorem varius ullamcorper. Sed congue pharetra velit ac tincidunt. Nullam ornare, ligula ac sollicitudin faucibus, risus mi hendrerit sapien, et tristique leo purus et arcu. Quisque ornare at neque ut cursus. Curabitur sit amet ipsum sed metus imperdiet ultrices eget eget ante. Aenean vitae lectus tellus.";
 
-export interface RiteData {
+export interface RiteData extends UniqueObject {
     completed: boolean;
     text: string;
     sort_order: number;
 }
 
-export interface TodayDeeds {
-    id: number;
+export interface TodayDeeds extends UniqueObject {
     level: number;
     text: string;
 }
 
-export interface WeekHabit {
-    id: number;
+export interface WeekHabit extends UniqueObject {
     checks: boolean[];
     text: string;
 }
@@ -40,22 +39,12 @@ export interface DiaryData {
     };
 }
 
-export function getWorkHappines(): TrackerData {
-    return {
-        id: 0,
-        name: "Насколько я доволен работой",
-        currentStep: 5,
-        totalSteps: 11
-    };
+export function getWorkHappines(): number {
+    return 1;
 }
 
-export function getSelfHappines(): TrackerData {
-    return {
-        id: 0,
-        name: "Насколько я счастлив",
-        currentStep: 7,
-        totalSteps: 11
-    };
+export function getSelfHappines(): number {
+    return 1;
 }
 
 export function getRites(): RiteData[] {
@@ -63,7 +52,7 @@ export function getRites(): RiteData[] {
     var rites: RiteData[] = [];
 
     for (let i = 0; i < 11; i++) {
-        rites.push({ completed: false, text: i.toString(), sort_order: i });
+        rites.push({ id: i, completed: false, text: i.toString(), sort_order: i });
     }
 
     return rites;

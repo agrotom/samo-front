@@ -1,7 +1,7 @@
+import type UniqueObject from "@/util/uniqueObject";
 import { getUser } from "./auth";
 
-export interface TrackerData {
-    id: number;
+export interface TrackerData extends UniqueObject {
     name: string;
     currentStep: number;
     totalSteps: number;

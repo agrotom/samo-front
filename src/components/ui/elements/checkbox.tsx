@@ -2,6 +2,7 @@ import EditableDiv from "@/components/ui/elements/editableDiv";
 import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import { useRef, useState } from "react";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 interface CheckboxProperties {
 
@@ -20,6 +21,7 @@ interface SortableCheckboxProperties {
     initText?: string;
     initEditMode?: boolean;
     onChange?: (data: CheckboxData) => void;
+    onDelete?: () => void;
     className?: string;
     value?: boolean;
 }
@@ -29,7 +31,7 @@ interface CheckboxData {
     text: string;
 }
 
-export function SortableCheckbox({ initText = '', hasLabel = true, value = false, initEditMode = false, className = '', size = 24, id, disabled = true, onChange, ...props }: SortableCheckboxProperties) {
+export function SortableCheckbox({ initText = '', hasLabel = true, value = false, className = '', size = 24, id, disabled = true, onChange, onDelete, ...props }: SortableCheckboxProperties) {
     const {
         attributes,
         listeners,
@@ -43,12 +45,16 @@ export function SortableCheckbox({ initText = '', hasLabel = true, value = false
         transition,
     };
 
+    const [checked, setChecked] = useState<boolean>(value);
     const [text, setText] = useState<string>(initText);
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`flex overflow-hidden items-start ${className}`} {...props}>
-            <Checkbox value={value} size={size} onChange={ newValue => onChange?.({ value: newValue, text: text }) } />
-            <EditableDiv initText={initText} editingAllow={!disabled} onChange={ text => onChange?.({ value: value, text: text }) } classNames={{container: 'ml-2.5'}}></EditableDiv>
+            <Checkbox value={value} size={size} onChange={ newValue => { setChecked(newValue); onChange?.({ value: newValue, text: text }); } } />
+            <EditableDiv initText={initText} editingAllow={!disabled} onChange={ text => { setText(text); onChange?.({ value: checked, text: text }); } } classNames={{container: 'ml-2.5'}}></EditableDiv>
+            <button className={ `cursor-pointer ml-auto mr-5 ${ disabled && 'hidden' }` } onClick={ onDelete }>
+                <FaRegTrashAlt/>
+            </button>
         </div>
     )
 }
