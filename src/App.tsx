@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import '@/App.css'
-import Header from '@/components/ui/sidebar/header';
-import Sidebar from '@/components/ui/sidebar/sidebar';
+import Header from '@/components/organisms/header';
+import Sidebar from '@/components/organisms/sidebar';
 import { Outlet, useLocation } from 'react-router-dom';
-import { useLayout } from '@/components/provider/layoutProvider';
+import { useLayout } from '@/provider/layoutProvider';
 import type { PageType } from '@/util/paging';
+
 
 function App() {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
@@ -16,10 +17,6 @@ function App() {
     const path = location.pathname.replace("/", "");
     layoutData.setCurrentPage(path as PageType || "home");
   }, [location]);
-
-  useEffect(() => {
-      document.documentElement?.classList.toggle('dark', !layoutData.isDaily && layoutData.currentPage === 'diary');
-  });
 
   return (
       <div className="md:h-[calc(100vh-60px)] flex">

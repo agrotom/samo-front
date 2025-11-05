@@ -1,0 +1,25 @@
+html[data-theme="light"] {
+  --color-brand: #FFFFFF;
+
+  --color-brand-active: #F3F6FB;
+
+  --color-primary-background: #F6F5F9;
+
+  --color-separator: var(--color-gray-300);
+
+  --color-checkbox-off: #E7E7E7;
+  --color-checkbox-on: #24315B;
+
+  --color-active-bar: #4F88DB;
+
+  --color-button: #3074D6;
+  --color-button-hover: #327AE3;
+
+  --shadow-brand-active: 4px 0px 0px 0px rgb(79,136,219);
+
+  --color-brand-hover: var(--color-gray-300);
+
+  --color-primary: #364160;
+
+  --color-tracker-active: var(--color-primary);
+}

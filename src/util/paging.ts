@@ -1,17 +1,17 @@
 const CURRENT_PAGE_TAG = 'currentPage';
 
-export type PageType = "home" | "diary" | "goals" | "lists" | "results" | "settings"
+export type PageType = "home" | "diary" | "objectives" | "lists" | "totals" | "settings"
 export function pageName(type: PageType) {
     switch (type) {
         case "home":
             return "Главная страница";
         case "diary":
             return "Дневник";
-        case "goals":
+        case "objectives":
             return "Цели";
         case "lists":
             return "Списки";
-        case "results":
+        case "totals":
             return "Итоги";
         case "settings":
             return "Настройки";

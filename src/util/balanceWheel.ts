@@ -5,13 +5,13 @@ export interface Balance {
 }
 
 export const LifeBrightness: Balance = {
-    id: "lifeBrightness",
+    id: "life_brightness",
     locale: "Яркость жизни",
     color: "blue"
 };
 
 export const SunPower: Balance = {
-    id: "sunPower",
+    id: "sun_power",
     locale: "Солнечная энергия",
     color: "orange"
 };

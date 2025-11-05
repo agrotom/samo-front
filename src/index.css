@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@import "./dark.css";
+@import "./light.css";
 
 @layer utilities {
   ::-webkit-scrollbar {
@@ -23,55 +24,44 @@
 
   .dark {
     ::-webkit-scrollbar {
-      @apply bg-brand-dark
+      @apply bg-brand
     }
 
     ::-webkit-scrollbar-track {
-      @apply bg-brand-active-dark rounded-lg
+      @apply bg-brand-active rounded-lg
     }
   }
 }
 
 @theme {
-  --color-brand: #FFFFFF;
-  --color-brand-light: #FFFFFF;
-  --color-brand-dark: #384362;
+  --color-brand: var(--color-brand);
 
-  --color-brand-active: #F3F6FB;
-  --color-brand-active-light: var(--color-brand-active-light);
-  --color-brand-active-dark: #3D526C;
+  --color-brand-active: var(--color-brand-active);
 
-  --color-primary-background: #F6F5F9;
-  --color-primary-background-light: var(--color-primary-background);
-  --color-primary-background-dark: #24315B;
+  --color-primary-background: var(--color-primary-background);
 
-  --color-separator: var(--color-gray-300);
-  --color-separator-dark: #435b78;
+  --color-separator: var(--color-separator);
 
-  --color-checkbox-off: #E7E7E7;
-  --color-checkbox-on: #24315B;
-  
-  --color-checkbox-off-dark: #515A72;  
-  --color-checkbox-on-dark: #DDE2FF;
+  --color-checkbox-off: var(--color-checkbox-off);
+  --color-checkbox-on: var(--color-checkbox-on);
 
-  --color-active-bar: #4F88DB;
-  --color-active-bar-dark: #65e7c6;
+  --color-active-bar-alt: #65e7c6;
+  --color-active-bar: var(--color-active-bar);
 
   --color-button: #3074D6;
   --color-button-hover: #327AE3;
 
-  --shadow-brand-active: 4px 0px 0px 0px rgb(79,136,219);
-  --shadow-brand-active-dark: 4px 0px 0px 0px var(--color-active-bar-dark);
+  --shadow-brand-active: var(--shadow-brand-active);
 
-  --color-brand-hover: var(--color-gray-300);
-  --color-brand-hover-light: var(--color-brand-hover);
-  --color-brand-hover-dark: #314257;
+  --color-brand-hover: var(--color-brand-hover);
 
-  --color-primary: #364160;
-  --color-primary-light: var(--color-primary);
-  --color-primary-dark: #DDE2FF;
+  --color-primary: var(--color-primary);
 
   --color-inactive: #E5E4EB;
 
   --color-secondary: #000000;
+
+  --color-input-border: oklch(87.2% 0.01 258.338);
+
+  --color-tracker-active: var(--color-tracker-active);
 }
