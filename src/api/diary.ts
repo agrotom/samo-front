@@ -1,5 +1,5 @@
 import type UniqueObject from "@/util/uniqueObject";
-import { getUser } from "./auth";
+import { API } from "./auth";
 import type { TrackerData } from "./trackers";
 
 export const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et tincidunt nulla. Vivamus sed mi vitae ante tempor mattis non sit amet orci. Quisque id justo tortor. Donec vel diam dignissim, cursus ligula quis, fermentum sapien. Etiam a imperdiet eros, vel aliquam elit. Pellentesque gravida dignissim lorem varius ullamcorper. Sed congue pharetra velit ac tincidunt. Nullam ornare, ligula ac sollicitudin faucibus, risus mi hendrerit sapien, et tristique leo purus et arcu. Quisque ornare at neque ut cursus. Curabitur sit amet ipsum sed metus imperdiet ultrices eget eget ante. Aenean vitae lectus tellus.";
@@ -83,28 +83,27 @@ export function getTodayDeeds(): TodayDeeds[] {
     ];
 }
 
-export function getFocus(): string {
-    return LOREM;
+const DIARY_URL = "diary/";
+
+export const INSIGHTS = "insights";
+export const FOCUSES = "focuses";
+export const THANKS = "thanks";
+export const PROBLEMS = "problems";
+export const RESULTS = "results";
+export const TOMORROW_MAIN_TASKS = "tomorrowMainTasks";
+
+export async function saveTextEntity(type: string, data: string) {
+    await API.put(`${DIARY_URL}${type}`, { text: data });
 }
 
-export function getThanks(): string {
-    return LOREM;
-}
+export async function getTextEntity(type: string): Promise<string> {
+    var response = await API.get(`${DIARY_URL}${type}`);
 
-export function getInsight(): string {
-    return "Нужно прожить день, проанализировать и сделать лучше.\nЭто значит быть осознанным.";
-}
+    if (response.status != 200) {
+        throw new Error(`Not able to fetch ${type} data!`);
+    }
 
-export function getProblems(): string {
-    return "1. Можно было больше времени посвятить семье и сходить погулять в парк\n2.Можно было сделать больший акцент на качество, а не количество";
-}
-
-export function getResults(): string {
-    return "1. Закрыл крупную сделку\n2. Получил новую работу.";
-}
-
-export function getTomorrowMainTasks(): string {
-    return "1. Организовать выставку\n2. 20 продаж за день\n3. Провести обучение персонала";
+    return response.data;
 }
 
 export function getWeekHabits(): WeekHabit[] {
@@ -128,45 +127,45 @@ export function getWeekHabits(): WeekHabit[] {
 }
 
 export function saveRites(rites: RiteData[]) {
-    console.log(`Saving rites ${ rites.map<string>(rite => rite.text + `: ${rite.completed}`) } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving rites ${ rites.map<string>(rite => rite.text + `: ${rite.completed}`) } to ${ new Date() } by user `);
 }
 
 export function saveFocus(focus: string) {
-    console.log(`Saving focus ${ focus } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving focus ${ focus } to ${ new Date() } by user `);
 }
 
 export function saveThanks(thanks: string) {
-    console.log(`Saving focus ${ thanks } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving focus ${ thanks } to ${ new Date() } by user `);
 }
 
 export function saveInsight(insight: string) {
-    console.log(`Saving focus ${ insight } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving focus ${ insight } to ${ new Date() } by user`);
 }
 
 export function saveProblems(problems: string) {
-    console.log(`Saving focus ${ problems } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving focus ${ problems } to ${ new Date() } by user `);
 }
 
 export function saveResults(results: string) {
-    console.log(`Saving focus ${ results } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving focus ${ results } to ${ new Date() } by user `);
 }
 
 export function saveTodayDeeds(todayDeeds: TodayDeeds[]) {
-    console.log(`Saving today deeds: ${todayDeeds.map(deed => `{ level: ${ deed.level }, text: ${ deed.text } }, `) } to ${new Date()} by user ${getUser()}`);
+    console.log(`Saving today deeds: ${todayDeeds.map(deed => `{ level: ${ deed.level }, text: ${ deed.text } }, `) } to ${new Date()} by user `);
 }
 
 export function saveTomorrowMainTasks(tasks: string) {
-    console.log(`Saving focus ${ tasks } to ${new Date()} by user ${getUser()}`);
+    console.log(`Saving focus ${ tasks } to ${new Date()} by user `);
 }
 
 export function saveWeekHabits(data: WeekHabit[]) {
-    console.log(`Saving habits ${ data.map(weekHabit => weekHabit.checks) } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving habits ${ data.map(weekHabit => weekHabit.checks) } to ${ new Date() } by user `);
 }
 
 export function setWorkHappiness(data: TrackerData) {
-    console.log(`Saving work happiness ${ data.currentStep } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving work happiness ${ data.currentStep } to ${ new Date() } by user `);
 }
 
 export function setSelfHappiness(data: TrackerData) {
-    console.log(`Saving self happiness ${ data.currentStep } to ${ new Date() } by user ${getUser()}`);
+    console.log(`Saving self happiness ${ data.currentStep } to ${ new Date() } by user `);
 }

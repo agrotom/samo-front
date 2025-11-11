@@ -52,10 +52,20 @@ export const messages = {
         no_image: "No image",
         page_not_found: "Page is not found!",
         password: "Password",
-        login: "Sign In",
-        login_header: "Sign In",
+        signin: "Sign In",
+        signin_header: "Sign In",
         no_account_question: "No account?",
-        signup_proposal: "Sign Up"
+        signup_proposal: "Sign Up",
+        signup: "Sign Up",
+        signup_header: "Sign Up",
+        has_account_question: "Has account already?",
+        signin_proposal: "Sign In",
+        sureName: "Sure name",
+        firstName: "First name",
+        birthDate: "Birth date",
+        achieve: "Achieve",
+        achieve_placeholder: "Design",
+        page_load_error: "Page load failed. Please refresh the page or try later!"
     },
     [LOCALES.RUSSIAN]: {
         home: "Главная страница",
@@ -108,9 +118,19 @@ export const messages = {
         no_image: "Нет картинки",
         page_not_found: "Страница не найдена!",
         password: "Пароль",
-        login: "Войти",
-        login_header: "Вход",
+        signin: "Войти",
+        signin_header: "Вход",
         no_account_question: "Нет аккаунта?",
-        signup_proposal: "Зарегистрироваться"
+        signup_proposal: "Зарегистрироваться",
+        signup: "Зарегистрироваться",
+        signup_header: "Регистрация",
+        has_account_question: "Есть аккаунт?",
+        signin_proposal: "Войти",
+        sureName: "Фамилия",
+        firstName: "Имя",
+        birthDate: "Дата рождения",
+        achieve: "Ниша",
+        achieve_placeholder: "Дизайн",
+        page_load_error: "Не удалось загрузить страницу. Перезагрузите страницу или попробуйте позже!"
     }
 }

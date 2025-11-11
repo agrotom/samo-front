@@ -1,8 +1,9 @@
 import { FormattedMessage } from "react-intl";
-import InputSubmit from "../atoms/inputSubmit";
-import TextHeader from "../atoms/text-header";
 import LabeledInput from "../molecules/labeledInput";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import SignFormTemplate from "../templates/signFormTemplate";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/provider/authProvider";
 
 interface SignInFormClassNames {
     container?: string;
@@ -12,30 +13,42 @@ interface SignInFormProperties {
     classNames?: SignInFormClassNames;
 }
 
-export default function signInForm({ classNames }: SignInFormProperties) {
+export default function SignInForm({ classNames }: SignInFormProperties) {
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
-    const [emailError, setEmailError] = useState<boolean>(false);
-    const [passwordError, setPasswordError] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
-    useEffect(() => {
-        setEmailError(!email.includes("@"));
-    }, [email, password]);
+    const { token, login, logout, isLoggedIn } = useAuth();
+
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            await login(email, password);
+            navigate("/");
+        } catch (error: any) {
+            setError(error);
+        }
+    };
 
     return (
-        <div className={ `flex flex-col space-y-2 p-5 w-screen md:w-100 ${ classNames?.container }` }>
-            <TextHeader text="login_header" className="mr-auto text-[25px]" />
-            <LabeledInput label="Email" id="email" text={ email } error={ emailError } onChange={ e => setEmail(e.target.value) } placeholder="myemail@mail.com" classNames={ { container: "mt-10" } } />
-            <LabeledInput label="password" translated={ true } id="password" text={ password } onChange={ e => setPassword(e.target.value) } placeholder="*******" />
-            <InputSubmit text="login" translated={ true } id="submit" className="mt-5" />
-            <div className="flex flex-row">
+        <div className={ `flex flex-col ${ classNames?.container }` }>
+            <SignFormTemplate haderTextLocaleId="signin_header" submitTextLocaleId="signin" onSubmit={ handleSubmit }>
+                <LabeledInput label="Email" id="email" text={ email } onChange={ e => setEmail(e.target.value) } placeholder="myemail@mail.com" />
+                <LabeledInput label="password" translated={ true } id="password" text={ password } onChange={ e => setPassword(e.target.value) } placeholder="*******" />
+            </SignFormTemplate>
+            <div className="flex flex-row mx-auto">
                 <FormattedMessage id="no_account_question" />
-                <a href="#" className="ml-1">
+                <a href="/signup" className="ml-1 text-blue-400">
                     <FormattedMessage id="signup_proposal" />
                 </a>
             </div>
+            <p className="flex mx-auto">
+                {error}
+            </p>
         </div>
     );
 }

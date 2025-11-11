@@ -1,4 +1,4 @@
-import { getTodayDeeds, getTomorrowMainTasks, type TodayDeeds } from "@/api/diary";
+import { getTodayDeeds, type TodayDeeds } from "@/api/diary";
 import { reserveID } from "@/util/uniqueObject";
 import { create } from "zustand";
 
@@ -13,7 +13,7 @@ interface StarsControllerState {
 
 const useStarsController = create<StarsControllerState>((set) => ({
     todayDeeds: getTodayDeeds(),
-    tomorrowMainTasksText: getTomorrowMainTasks(),
+    tomorrowMainTasksText: '',
     setTomorrowMainTasksText: data => set(state => ({ ...state, thanksText: data })),
     addEmptyTodayDeed: () => set(state => ({
         ...state,

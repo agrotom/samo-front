@@ -1,4 +1,4 @@
-import { getFocus, getInsight, getProblems, getResults, getThanks, getTomorrowMainTasks } from "@/api/diary";
+import { saveTextEntity, getTextEntity, FOCUSES, INSIGHTS, THANKS, PROBLEMS, RESULTS, TOMORROW_MAIN_TASKS } from "@/api/diary";
 import { create } from "zustand";
 
 interface DiaryControllerState {
@@ -14,21 +14,59 @@ interface DiaryControllerState {
     setResultsText: (data: string) => void;
     tomorrowMainTasksText: string;
     setTomorrowMainTasksText: (data: string) => void;
+
+    fetchData: () => Promise<void>;
 }
 
 const useDiaryController = create<DiaryControllerState>((set) => ({
-    focusText: getFocus(),
-    setFocusText: data => set(state => ({ ...state, focusText: data })),
-    insightText: getInsight(),
-    setInsightText: data => set(state => ({ ...state, insightText: data })),
-    thanksText: getThanks(),
-    setThanksText: data => set(state => ({ ...state, thanksText: data })),
-    problemsText: getProblems(),
-    setProblemsText: data => set(state => ({ ...state, thanksText: data })),
-    resultsText: getResults(),
-    setResultsText: data => set(state => ({ ...state, thanksText: data })),
-    tomorrowMainTasksText: getTomorrowMainTasks(),
-    setTomorrowMainTasksText: data => set(state => ({ ...state, thanksText: data }))
+    focusText: '',
+    setFocusText: async data => {
+        set(state => ({ ...state, focusText: data }));
+        await saveTextEntity(FOCUSES, data); 
+    },
+    insightText: '',
+    setInsightText: async data => {
+        set(state => ({ ...state, insightText: data }));
+        await saveTextEntity(INSIGHTS, data);
+    },
+    thanksText: '',
+    setThanksText: async data => {
+        set(state => ({ ...state, thanksText: data }));
+        await saveTextEntity(THANKS, data);
+    },
+    problemsText: '',
+    setProblemsText: async data => {
+        set(state => ({ ...state, problemsText: data }));
+        await saveTextEntity(PROBLEMS, data);
+    },
+    resultsText: '',
+    setResultsText: async data => {
+        set(state => ({ ...state, resultsText: data }));
+        await saveTextEntity(RESULTS, data);
+    },
+    tomorrowMainTasksText: '',
+    setTomorrowMainTasksText: async data => {
+        set(state => ({ ...state, tomorrowMainTasksText: data }));
+        await saveTextEntity(TOMORROW_MAIN_TASKS, data);
+    },
+
+    fetchData: async () => {
+        const focus = await getTextEntity(FOCUSES);
+        const insight = await getTextEntity(INSIGHTS);
+        const thanks = await getTextEntity(THANKS);
+        const problems = await getTextEntity(PROBLEMS);
+        const results = await getTextEntity(RESULTS);
+        const tomorrowMainTasks = await getTextEntity(TOMORROW_MAIN_TASKS);
+
+        set({
+            focusText: focus,
+            insightText: insight,
+            thanksText: thanks,
+            problemsText: problems,
+            resultsText: results,
+            tomorrowMainTasksText: tomorrowMainTasks
+        });
+    }
 }));
 
 export default useDiaryController;

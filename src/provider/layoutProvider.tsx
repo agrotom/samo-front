@@ -1,6 +1,6 @@
 import { LOCALES } from "@/i18n/locales";
 import { type PageType } from "@/util/paging";
-import usePersistedState from "@/util/usePersistedState";
+import usePersistedState from "@/hooks/usePersistedState";
 import { createContext, useContext } from "react";
 
 interface LayoutContextType {

@@ -5,12 +5,10 @@ import BlockInput from "@/components/templates/blockInput";
 import BlockRitesList from "@/components/templates/blockRitesList";
 import tracker_image from '@/assets/tracker_image.svg'
 import { useLayout } from "@/provider/layoutProvider";
-import { getTomorrowMainTasks } from "@/api/diary";
 import BlockStar, { StarLabel } from "@/components/templates/blockStar";
 import BlockHappy from "../templates/blockHappy";
 import Modal from "@/components/templates/modal";
 import TextHeader from "../atoms/text-header";
-import { getUserInfo } from "@/api/auth";
 import NoteImage from "@/assets/note.svg";
 import BottomImage from "@/assets/bottom_image_left.svg";
 import CornerImage from "@/assets/corner_image.svg";
@@ -18,6 +16,7 @@ import useDiaryController from "@/controller/diaryController";
 import useHappyBlockController from "@/controller/happyBlockController";
 import useStarsController from "@/controller/starsController";
 import { FormattedMessage } from "react-intl";
+import { useAuth } from "@/provider/authProvider";
 
 interface DiaryProperties {
     date: Date;
@@ -79,16 +78,20 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
 
     const resultsText = useDiaryController(state => state.resultsText);
     const setResultsText = useDiaryController(state => state.setResultsText);
+
+    const tomorrowMainTasksText = useDiaryController(state => state.tomorrowMainTasksText);
     
     const workHappiness = useHappyBlockController(state => state.workHappinessTracker);
     const selfHappiness = useHappyBlockController(state => state.selfHappinessTracker);
 
     const todayDeeds = useStarsController(state => state.todayDeeds)
 
+    const { user } = useAuth();
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-2 grid-rows-1 lg:h-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-[auto_1fr_1fr] gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-2 grid-rows-1 md:h-full">
                         {
                             createCalendar(date)
                         }
@@ -119,7 +122,7 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
                     </div>
                 </div>
 
-                <div className="relative bg-brand p-6 rounded-lg lg:col-start-2 h-100 overflow-hidden">
+                <div className="relative bg-brand p-6 rounded-lg lg:col-start-2 h-94 overflow-hidden">
                     <img className="absolute right-25 top-40 pointer-events-none hidden lg:block" src={NoteImage}/>
                     <BlockStar />      
                 </div>
@@ -129,10 +132,10 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
                 </div>
 
                 <Modal header="sending_header" submitText="send" open={openModal} setOpen={setOpenModal}>
-                    <div className="flex flex-col space-y-1">
+                    <div className="flex flex-col space-y-4">
                         <div className="flex flex-row">
-                            <TextHeader text={
-                                getUserInfo().sureName + ' ' + getUserInfo().firstName
+                            <TextHeader localization={ false } text={
+                                user?.sureName + ' ' + user?.firstName
                             } />
                             <div className="flex flex-col ml-auto">
                                 <div className="flex flex-row justify-between">
@@ -177,7 +180,7 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
                         <div>
                             <TextHeader text='tomorrow_main_deeds'/>
                             <p className={ `whitespace-pre-line h-[75%] overflow-y-auto outline-0 w-full text-wrap break-all` }>
-                                { getTomorrowMainTasks() }
+                                { tomorrowMainTasksText }
                             </p>
                         </div>
                     </div>

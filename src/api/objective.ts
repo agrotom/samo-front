@@ -1,4 +1,3 @@
-import { getUser } from "./auth";
 import { LOREM } from "./diary";
 import { LifeBrightness, type Balance } from "@/util/balanceWheel";
 import type { GoalData } from "./goals";
@@ -117,5 +116,5 @@ export function getFocusedObjectives(): ObjectiveData[] {
 }
 
 export function saveMission(text: string) {
-    console.log(`Saving mission: ${ text } to ${new Date()} by user ${getUser()}`);
+    console.log(`Saving mission: ${ text } to ${new Date()} by user`);
 }

@@ -49,7 +49,7 @@ export function SortableCheckbox({ initText = '', hasLabel = true, value = false
     const [text, setText] = useState<string>(initText);
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`flex overflow-hidden items-start ${className}`} {...props}>
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`flex overflow-hidden items-start ${ !disabled && 'cursor-pointer' } ${className}`} {...props}>
             <Checkbox value={value} size={size} onChange={ newValue => { setChecked(newValue); onChange?.({ value: newValue, text: text }); } } />
             <EditableDiv initText={initText} editingAllow={!disabled} onChange={ text => { setText(text); onChange?.({ value: checked, text: text }); } } classNames={{container: 'ml-2.5'}}></EditableDiv>
             <button className={ `cursor-pointer ml-auto mr-5 my-auto ${ disabled && 'hidden' }` } onClick={ onDelete }>

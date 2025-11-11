@@ -9,6 +9,8 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useLayout } from "@/provider/layoutProvider";
 import setIsDaily from "@/util/dailySwitch";
 import { FormattedMessage } from "react-intl";
+import { useAuth } from "@/provider/authProvider";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarProperties {
     isExpanded: () => boolean;
@@ -16,6 +18,10 @@ interface SidebarProperties {
 }
 
 function Sidebar({ isExpanded, setIsExtended }: SidebarProperties) {
+
+    const { logout } = useAuth();
+
+    const navigate = useNavigate();
 
     const isHidden = () => isExpanded() ? '' : 'hidden';
     const toggle = () => setIsExtended(!isExpanded()); //${ !isMobile ? (isExpanded() ? 'sm:w-72' : 'w-27') : (isExpanded() ? 'w-full' : '-translate-x-full w-full') }
@@ -84,7 +90,9 @@ function Sidebar({ isExpanded, setIsExtended }: SidebarProperties) {
                                 </SidebarElement>
                             }
                             <SidebarElement className={`flex flex-col absolute bottom-0 items-center category justify-center mb-10 ${isHidden()}`}>
-                                <BorderButton children={ <FormattedMessage id="sign_out" /> } />
+                                <BorderButton onClick={ () => { logout(); navigate("/signin"); }}>
+                                    <FormattedMessage id="sign_out" />
+                                </BorderButton>
                             </SidebarElement>
                         </ul>
                     </nav>

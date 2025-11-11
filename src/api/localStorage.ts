@@ -15,7 +15,7 @@ export function loadIsDaily(): boolean {
 }
 
 export function saveState<T>(key: string, state: T) {
-    localStorage.setItem(key, JSON.stringify(state));
+    localStorage.setItem(key, typeof state == "string" ? state : JSON.stringify(state));
 }
 
 export function loadState<T>(key: string): T | null {
@@ -28,7 +28,7 @@ export function loadState<T>(key: string): T | null {
     try {
         return JSON.parse(value) as T;
     }
-    catch {
-        return null;
+    catch (err) {
+        return value as T;
     }
 }

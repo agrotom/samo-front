@@ -120,7 +120,7 @@ export default function BlockStar() {
             <div className="grid grid-cols-2 grid-rows-1 mt-2 auto-rows-min">
                 <p className="col-start-2 text-sm"><FormattedMessage id="importance" /></p>
             </div>
-            <div className="grid grid-cols-2 h-[128px] overflow-y-scroll mb-5">
+            <div className="grid grid-cols-2 h-30 overflow-y-scroll">
                 {
                     todayDeeds.map(data => <StarLabel key={ data.id } initText={ data.text } initLevel={ data.level } onChange={ e => modifyTodayDeed(data.id, { ...data, text: e.text, level: e.level }) } editable={editable} onDelete={ () => { removeTodayDeed(data.id) } } />)
                 }

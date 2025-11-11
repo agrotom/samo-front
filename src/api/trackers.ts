@@ -1,5 +1,4 @@
 import type UniqueObject from "@/util/uniqueObject";
-import { getUser } from "./auth";
 
 export interface TrackerData extends UniqueObject {
     name: string;
@@ -41,11 +40,11 @@ const trackerData: TrackerData[] = [
 ];
 
 export function saveTrackerData(newData: TrackerData) {
-    console.log(`Saving tracker ${ newData } to ${ new Date() } by user ${ getUser() }`);
+    console.log(`Saving tracker ${ newData } to ${ new Date() } by user`);
 }
 
 export function setTrackers(newData: TrackerData[]) {
-    console.log(`Saving trackers ${ newData.map(data => data.currentStep) } to ${ new Date() } by user ${ getUser() }`);
+    console.log(`Saving trackers ${ newData.map(data => data.currentStep) } to ${ new Date() } by user`);
 }
 
 export function getTrackers(): TrackerData[] {

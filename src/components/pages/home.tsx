@@ -9,7 +9,6 @@ import { ObjectiveModal } from "./goals";
 import { useState } from "react";
 import useObjectivesController from "@/controller/objectivesController";
 import useDiaryController from "@/controller/diaryController";
-import { useIntl } from "react-intl";
 
 export default function Home() {
 
@@ -20,8 +19,6 @@ export default function Home() {
     const insightText = useDiaryController(state => state.insightText);
 
     const [openModal, setOpenModal] = useState<boolean>(false);
-
-    const intl = useIntl();
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 md:grid-rows-[auto_1fr_0.5fr] gap-4">

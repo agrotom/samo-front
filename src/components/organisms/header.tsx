@@ -4,8 +4,8 @@ import { IoIosNotifications } from "react-icons/io";
 
 import example from "./example.jpg"
 import { useLayout } from "@/provider/layoutProvider";
-import { getUserInfo } from "@/api/auth";
 import { FormattedMessage } from "react-intl";
+import { useAuth } from "@/provider/authProvider";
 
 interface HeaderProperties {
     isExpanded: () => boolean;
@@ -14,6 +14,8 @@ interface HeaderProperties {
 
 function Header({ isExpanded, setIsExtended }: HeaderProperties) {
     const toggle = () => setIsExtended(!isExpanded());
+
+    const { user } = useAuth();
 
     const layoutData = useLayout();
 
@@ -46,7 +48,7 @@ function Header({ isExpanded, setIsExtended }: HeaderProperties) {
                     </div>
                     <div className="flex ml-15">
                         <button className="flex items-center justify-center cursor-pointer">
-                            <p className="hidden md:block">{getUserInfo().firstName + ' ' + getUserInfo().sureName}</p>
+                            <p className="hidden md:block">{ user?.firstName + ' ' + user?.sureName }</p>
                             <img className="ml-5 w-10 h-10 rounded-full border-2 border-pink-100" src={example} alt="Avatar"></img>
                         </button>
                     </div>

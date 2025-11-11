@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DayPicker, getDefaultClassNames } from "react-day-picker";
+import { DayPicker, Dropdown, getDefaultClassNames, YearsDropdown } from "react-day-picker";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { LuSquareArrowDown } from "react-icons/lu";
@@ -21,7 +21,7 @@ function CustomCaptionComponent(props: MonthCaptionProps) {
       >
         <ChevronLeft className="w-4 h-4" />
       </button>
-      <h2 className='text-center'>{format(props.calendarMonth.date, "LLLL yyyy", { locale: ru })}</h2>
+      <h2 className='text-center'>{format(props.calendarMonth.date, "LLLL", { locale: ru })}</h2>
       <button
         className='mx-auto'
         disabled={!nextMonth}
@@ -39,7 +39,6 @@ interface CalendarProperties {
     setOpen?:(value: boolean) => void;
     onChange?: (date: Date) => void;
 }
-
 export default function Calendar({ currentDate = new Date(), onChange, open, setOpen }: CalendarProperties) {
     const defaultClassNames = getDefaultClassNames();
     const [show, setShow] = useState(open ?? false);
@@ -92,6 +91,7 @@ export default function Calendar({ currentDate = new Date(), onChange, open, set
                             navLayout="around"
                             selected={selected}
                             onSelect={value => { setSelected(value); onChange?.(value); }}
+                            captionLayout="dropdown-years"
                             components={{
                                 MonthCaption: CustomCaptionComponent
                             }}
@@ -104,7 +104,8 @@ export default function Calendar({ currentDate = new Date(), onChange, open, set
                                 day: `hover:bg-brand-active hover:text-active-bar w-10 h-10`,
                                 day_button: `min-h-full min-w-full`,
                                 week: `h-10`,
-                                month_caption: `w-32`
+                                month_caption: `w-32`,
+                                years_dropdown: 'h-5'
                             }}/>
                     </div>
                 </div>,
