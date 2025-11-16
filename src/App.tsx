@@ -8,7 +8,6 @@ import { useLayout } from '@/provider/layoutProvider';
 import type { PageType } from '@/util/paging';
 import useDiaryController from './controller/diaryController';
 import { FormattedMessage } from 'react-intl';
-import { ProtectedRoute } from './components/atoms/protectedRouter';
 
 
 function App() {

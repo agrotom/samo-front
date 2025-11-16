@@ -48,39 +48,11 @@ export function getSelfHappines(): number {
 }
 
 export function getRites(): RiteData[] {
-
-    var rites: RiteData[] = [];
-
-    for (let i = 0; i < 11; i++) {
-        rites.push({ id: i, completed: false, text: i.toString(), sort_order: i });
-    }
-
-    return rites;
+    return [];
 }
 
 export function getTodayDeeds(): TodayDeeds[] {
-    return [
-        {
-            id: 0,
-            level: 0,
-            text: '1. Подпись документов'
-        },
-        {
-            id: 1,
-            level: 1,
-            text: '2. Встреча с инвесторами'
-        },
-        {
-            id: 2,
-            level: 2,
-            text: '3. Свидание с Машей'
-        },
-        {
-            id: 3,
-            level: 3,
-            text: 'CRAFT'
-        }
-    ];
+    return [];
 }
 
 const DIARY_URL = "diary/";
@@ -107,23 +79,7 @@ export async function getTextEntity(type: string): Promise<string> {
 }
 
 export function getWeekHabits(): WeekHabit[] {
-    return [
-        {
-            id: 0,
-            checks: [false, true, false, false, true, false, true],
-            text: "Начать вставать в 6 часов утра"
-        },
-        {
-            id: 1,
-            checks: [false, true, false, true, true, true, true],
-            text: "Бросить курить"
-        },
-        {
-            id: 2,
-            checks: [false, true, false, false, false, false, false],
-            text: "Читать каждый день минимум час"
-        }
-    ];
+    return [];
 }
 
 export function saveRites(rites: RiteData[]) {

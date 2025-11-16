@@ -48,14 +48,14 @@ const createEmptyObjectiveData = (): ObjectiveData => {
     return (
         {
             id: 0,
-            label: 'unnamed',
+            label: 'Без названия',
             text: '',
             favorite: false,
             balanceType: LifeBrightness,
             date: new Date(),
             completed: false,
             image_url: undefined,
-            goalsLabel: 'unnamed',
+            goalsLabel: 'Без названия',
             goals: []
         }   
     )
@@ -81,7 +81,7 @@ const useObjectivesController = create<ObjectivesControllerState>((set, get) => 
     addEmptyObjectiveGoal: id => set(state => {
         const newObjectives = state.objectives.map(oldData => oldData.id == id ?
             {
-                ...oldData, goals: [ ...oldData.goals, { id: reserveID(oldData.goals), text: 'unnamed', completed: false, deadLine: new Date() } ]
+                ...oldData, goals: [ ...oldData.goals, { id: reserveID(oldData.goals), text: 'Без названия', completed: false, deadLine: new Date() } ]
             } : oldData);
 
         return { selectedObjective: id == state.selectedObjective.id ? newObjectives.find(data => data.id == id) : state.selectedObjective, objectives: newObjectives }

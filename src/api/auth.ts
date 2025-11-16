@@ -78,11 +78,19 @@ export interface UserInfo {
 }
 
 export const getUser = async (): Promise<UserInfo | null> => {
-    try {
+    
+    return {
+        email: "",
+        sureName: "Иван",
+        firstName: "Иванов",
+        achieve: "design",
+        birthDate: new Date()
+    }
+    /*try {
         var data = (await API.get("auth/me")).data;
         return { email: data.email, sureName: data.sureName, firstName: data.firstName, achieve: data.achieve, birthDate: data.birthDate };
     }
     catch(err) {
         return null;
-    }
+    }*/
 }

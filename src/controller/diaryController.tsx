@@ -51,21 +51,6 @@ const useDiaryController = create<DiaryControllerState>((set) => ({
     },
 
     fetchData: async () => {
-        const focus = await getTextEntity(FOCUSES);
-        const insight = await getTextEntity(INSIGHTS);
-        const thanks = await getTextEntity(THANKS);
-        const problems = await getTextEntity(PROBLEMS);
-        const results = await getTextEntity(RESULTS);
-        const tomorrowMainTasks = await getTextEntity(TOMORROW_MAIN_TASKS);
-
-        set({
-            focusText: focus,
-            insightText: insight,
-            thanksText: thanks,
-            problemsText: problems,
-            resultsText: results,
-            tomorrowMainTasksText: tomorrowMainTasks
-        });
     }
 }));
 

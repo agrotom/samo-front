@@ -63,52 +63,7 @@ export var ALL_OBJECTIVES = [
     ];
 
 export function getAllObjectives(): ObjectiveData[] {
-    return [
-        {
-            id: 0,
-            label: "Свадьба",
-            text: LOREM,
-            favorite: true,
-            balanceType: LifeBrightness,
-            date: new Date(2026, 9, 20),
-            completed: false,
-            goalsLabel: "Без названия",
-            goals: []
-        },
-        {
-            id: 1,
-            label: "Сделать открытие",
-            text: "Просто открытие",
-            favorite: true,
-            balanceType: LifeBrightness,
-            date: new Date(2025, 11, 20),
-            completed: false,
-            goalsLabel: "Без названия",
-            goals: []
-        },
-        {
-            id: 2,
-            label: "Открыть свой магазин",
-            text: "Просто открыть свой магазин",
-            favorite: false,
-            balanceType: LifeBrightness,
-            date: new Date(2025, 11, 20),
-            completed: false,
-            goalsLabel: "Без названия",
-            goals: []
-        },
-        {
-            id: 3,
-            label: "Прыгнуть с парашютом",
-            text: "Просто прыгнуть",
-            favorite: true,
-            balanceType: LifeBrightness,
-            date: new Date(2026, 3, 20),
-            completed: false,
-            goalsLabel: "Без названия",
-            goals: []
-        }
-    ];
+    return [];
 }
 
 export function getFocusedObjectives(): ObjectiveData[] {
