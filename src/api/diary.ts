@@ -79,7 +79,23 @@ export async function getTextEntity(type: string): Promise<string> {
 }
 
 export function getWeekHabits(): WeekHabit[] {
-    return [];
+    return [
+        {
+            id: 0,
+            checks: [false, true, false, false, true, false, true],
+            text: "Без названия"
+        },
+        {
+            id: 1,
+            checks: [false, true, false, true, true, true, true],
+            text: "Без названия"
+        },
+        {
+            id: 2,
+            checks: [false, true, false, false, false, false, false],
+            text: "Без названия"
+        }
+    ];
 }
 
 export function saveRites(rites: RiteData[]) {
