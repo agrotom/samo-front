@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaStar, FaRegStar, FaRegTrashAlt } from "react-icons/fa";
 import { ControllableHeader } from "@/components/atoms/text-header";
 import InlineEditableText from "@/components/atoms/editableDiv";
@@ -7,6 +7,7 @@ import BlockInput from "./blockInput";
 import { clamp } from "@/util/math";
 import useStarsController from "@/controller/starsController";
 import { FormattedMessage } from "react-intl";
+import useDiaryController from "@/controller/diaryController";
 
 interface StarLabelChangedEvent {
     text: string;
@@ -101,10 +102,14 @@ export function StarLabel({initLevel, initText, onChange, readonly = false, edit
     );
 }
 
-export default function BlockStar() {
+interface BlockStarProperties {
+    disabled?: boolean;
+}
 
-    const tomorrowMainTasksText = useStarsController(state => state.tomorrowMainTasksText);
-    const setTomorrowMainTasksText = useStarsController(state => state.setTomorrowMainTasksText);
+export default function BlockStar({ disabled = false }: BlockStarProperties) {
+
+    const tomorrowMainTasksText = useDiaryController(state => state.tomorrowMainTasksText);
+    const setTomorrowMainTasksText = useDiaryController(state => state.setTomorrowMainTasksText);
 
     const todayDeeds = useStarsController(state => state.todayDeeds); 
     const addEmptyTodayDeed = useStarsController(state => state.addEmptyTodayDeed); 
@@ -116,16 +121,16 @@ export default function BlockStar() {
     return (
 
         <div className="flex flex-col h-full">
-            <ControllableHeader text="today_deeds" onAdd={ addEmptyTodayDeed } editable={editable} setEditable={setEditable} />
+            <ControllableHeader text="today_deeds" onAdd={ addEmptyTodayDeed } disabled={disabled} editable={editable} setEditable={setEditable} />
             <div className="grid grid-cols-2 grid-rows-1 mt-2 auto-rows-min">
                 <p className="col-start-2 text-sm"><FormattedMessage id="importance" /></p>
             </div>
             <div className="grid grid-cols-2 h-30 overflow-y-scroll">
                 {
-                    todayDeeds.map(data => <StarLabel key={ data.id } initText={ data.text } initLevel={ data.level } onChange={ e => modifyTodayDeed(data.id, { ...data, text: e.text, level: e.level }) } editable={editable} onDelete={ () => { removeTodayDeed(data.id) } } />)
+                    todayDeeds.sort((a, b) => a.createdAt.getUTCDate() - b.createdAt.getUTCDate()).map((data, _) => <StarLabel key={ `star_label_${ data.id }` } initText={ data.text } initLevel={ data.level } onChange={ e => modifyTodayDeed(data.id, { ...data, text: e.text, level: e.level }) } editable={editable} onDelete={ () => { removeTodayDeed(data.id) } } />)
                 }
             </div>
-            <BlockInput header="tomorrow_main_deeds" initText={ tomorrowMainTasksText } onChange={ data => setTomorrowMainTasksText(data) } outerEditable={editable} outerControl classNames={
+            <BlockInput name="tomorrow_main_deeds" header="tomorrow_main_deeds" disabled={disabled} initText={ tomorrowMainTasksText } onChange={ data => setTomorrowMainTasksText(data) } outerEditable={editable} outerControl classNames={
                 {
                     container: "lg:mr-70"
                 }

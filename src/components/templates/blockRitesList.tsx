@@ -24,10 +24,11 @@ interface BlockRitesClassNames {
 }
 
 interface BlockRitesListProperties {
+    disabled?: boolean;
     classNames?: BlockRitesClassNames;
 }
 
-export default function BlockRitesList({ classNames }: BlockRitesListProperties) {
+export default function BlockRitesList({ disabled = false, classNames }: BlockRitesListProperties) {
     const rites = useRitesController(state => state.rites);
 
     const modifyRite = useRitesController(state => state.modifyRite);
@@ -73,7 +74,7 @@ export default function BlockRitesList({ classNames }: BlockRitesListProperties)
     return (
         <>
             <div className={`flex flex-col min-h-0 ${classNames?.container}`}>
-                <ControllableHeader text='rites' editable={editable} onAdd={ addEmptyRite } setEditable={setEditable}/>
+                <ControllableHeader text='rites' disabled={disabled} editable={ editable } onAdd={ addEmptyRite } setEditable={setEditable}/>
                     <div className={`flex-1 my-10 relative overflow-y-scroll overflow-x-clip ${ editable && 'touch-none' }`}>
                         <DndContext
                             sensors={sensors}
@@ -84,7 +85,7 @@ export default function BlockRitesList({ classNames }: BlockRitesListProperties)
                                 items={rites.map(rite => rite.id)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {rites.map(rite => <SortableCheckbox onDelete={ () => { removeRite(rite.id)  } } disabled={!editable} className='mb-5' onChange={data => modifyRite(rite.id, { ...rite, completed: data.value, text: data.text }) } value={rite.completed} key={`rite-${rite.id}`} id={rite.id} initText={rite.text} />)}
+                                {rites.sort((a, b) => a.sort_order - b.sort_order).map(rite => <SortableCheckbox disabled={ disabled } onDelete={ () => { removeRite(rite.id)  } } allowEditing={!editable} className='mb-5' onChange={data => modifyRite(rite.id, { ...rite, completed: data.value, text: data.text }) } value={rite.completed} key={`rite-${rite.id}`} id={rite.id} initText={rite.text} />)}
                             </SortableContext>
                         </DndContext>
                     </div>

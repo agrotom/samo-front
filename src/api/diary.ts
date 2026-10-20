@@ -1,6 +1,6 @@
-import type UniqueObject from "@/util/uniqueObject";
+import type UniqueObject from "@/interfaces/uniqueObject";
 import { API } from "./auth";
-import type { TrackerData } from "./trackers";
+import { format } from "date-fns";
 
 export const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin et tincidunt nulla. Vivamus sed mi vitae ante tempor mattis non sit amet orci. Quisque id justo tortor. Donec vel diam dignissim, cursus ligula quis, fermentum sapien. Etiam a imperdiet eros, vel aliquam elit. Pellentesque gravida dignissim lorem varius ullamcorper. Sed congue pharetra velit ac tincidunt. Nullam ornare, ligula ac sollicitudin faucibus, risus mi hendrerit sapien, et tristique leo purus et arcu. Quisque ornare at neque ut cursus. Curabitur sit amet ipsum sed metus imperdiet ultrices eget eget ante. Aenean vitae lectus tellus.";
 
@@ -8,79 +8,133 @@ export interface RiteData extends UniqueObject {
     completed: boolean;
     text: string;
     sort_order: number;
+    createdAt: Date;
+}
+
+export interface TodayDeedRequest {
+    level: number,
+    text: string;
 }
 
 export interface TodayDeeds extends UniqueObject {
     level: number;
     text: string;
+    createdAt: Date;
 }
 
 export interface WeekHabit extends UniqueObject {
     checks: boolean[];
     text: string;
+    createdAt: Date;
 }
 
-export interface DiaryData {
-    date: Date,
-    morning: {
-        rites: RiteData[],
-        focus: string,
-        thanks: string; // Блок "Я благодарю за то, что..."
-    },
-    evening: {
-        insight: string,
-        problems: string,
-        results: string,
-        todayDeeds: TodayDeeds[],
-        tomorrowMainTasks: string,
-        workHappiness: number,
-        selfHappiness: number,
-        weekHabits: WeekHabit[];
-    };
+export interface WeekHabitDTO {
+    id: number;
+    checks: boolean[];
+    text: string;
+    createdAt: string;
 }
 
-export function getWorkHappines(): number {
-    return 1;
+export interface WeekHabitRequest {
+    checks: boolean[];
+    text: string;
 }
 
-export function getSelfHappines(): number {
-    return 1;
+export interface ToadyDeedDTO {
+    id: number;
+    level: number;
+    text: string;
+    createdAt: string;
 }
 
-export function getRites(): RiteData[] {
+export interface RiteDataRequest {
+    completed: boolean;
+    text: string;
+    sort_order: number;
+}
 
-    var rites: RiteData[] = [];
+export interface RiteDataDTO {
+    id: number;
+    completed: boolean;
+    text: string;
+    sort_order: number;
+    createdAt: string;
+}
 
-    for (let i = 0; i < 11; i++) {
-        rites.push({ id: i, completed: false, text: i.toString(), sort_order: i });
+const EMPTY_WEEK_HABIT: WeekHabit = {
+    id: 0,
+    checks: [false, false, false, false, false, false, false],
+    text: "Без названия",
+    createdAt: new Date()
+};
+
+function toISO(date: Date) {
+    return format(date, "yyyy-LL-dd").slice(0, 10);
+}
+
+export async function setWorkHappiness(level: number) {
+    await API.post(`happiness/work/${level}`);
+}
+
+export async function getWorkHappiness(date: Date): Promise<number> {
+    return (await API.get("happiness/work?date=" + toISO(date)).then(err => { err.status = 200; return err }).catch(() => ({ data: null}))).data.level ?? 1;
+}
+
+export async function setSelfHappiness(level: number) {
+    await API.post(`happiness/self/${level}`);
+}
+
+export async function getSelfHappiness(date: Date): Promise<number> {
+    return (await API.get("happiness/self?date=" + toISO(date))).data.level ?? 1;
+}
+
+export async function modifyRite(data: RiteData) {
+    await API.put(`rite/${ data.id }`, data);
+}
+
+export async function removeRite(id: number) {
+    await API.delete(`rite/${ id }`);
+}
+
+export async function addRite(data: RiteDataRequest): Promise<number> {
+    return (await API.post(`rite`, data)).data.id;
+}
+
+export async function getRites(date: Date): Promise<RiteData[]> {
+    const rites: RiteDataDTO[] = (await API.get("rite?date=" + toISO(date))).data.data ?? [];
+
+    return rites.map(dto => ({ id: dto.id, text: dto.text, completed: dto.completed, sort_order: dto.sort_order, createdAt: new Date(dto.createdAt) }));
+}
+
+export async function addTodayDeed(data: TodayDeedRequest): Promise<number> {
+    return (await API.post("todayDeed", data)).data.id;
+}
+
+export async function modifyTodayDeed(id: number, data: TodayDeedRequest) {
+    await API.put(`todayDeed/${ id }`, data);
+}
+
+export async function removeTodayDeed(id: number) {
+    await API.delete(`todayDeed/${ id }`);
+}
+
+export async function getTodayDeeds(date: Date): Promise<TodayDeeds[]> {
+    const todayDeeds: ToadyDeedDTO[] = (await API.get("todayDeed?date=" + toISO(date))).data.data ?? [];
+    return todayDeeds.map(dto => ({ id: dto.id, level: dto.level, text: dto.text, createdAt: new Date(dto.createdAt) }));
+}
+
+export async function modifyWeekHabit(data: WeekHabit) {
+    await API.post(`weekHabit/${ data.id }`, data);
+}
+
+export async function getWeekHabits(date: Date): Promise<WeekHabit[]> {
+    const weekHabits: WeekHabitDTO[] = (await API.get("weekHabit?date=" + toISO(date))).data.data ?? [];
+    
+    if (weekHabits.length === 0) {
+        return [{ ...EMPTY_WEEK_HABIT, id: -1 }, { ...EMPTY_WEEK_HABIT, id: -2 }, { ...EMPTY_WEEK_HABIT, id: -3 }];
     }
 
-    return rites;
-}
-
-export function getTodayDeeds(): TodayDeeds[] {
-    return [
-        {
-            id: 0,
-            level: 0,
-            text: '1. Подпись документов'
-        },
-        {
-            id: 1,
-            level: 1,
-            text: '2. Встреча с инвесторами'
-        },
-        {
-            id: 2,
-            level: 2,
-            text: '3. Свидание с Машей'
-        },
-        {
-            id: 3,
-            level: 3,
-            text: 'CRAFT'
-        }
-    ];
+    return weekHabits.map(dto => ({ id: dto.id, text: dto.text, checks: dto.checks, createdAt: new Date(dto.createdAt) }));
 }
 
 const DIARY_URL = "diary/";
@@ -96,76 +150,8 @@ export async function saveTextEntity(type: string, data: string) {
     await API.put(`${DIARY_URL}${type}`, { text: data });
 }
 
-export async function getTextEntity(type: string): Promise<string> {
-    var response = await API.get(`${DIARY_URL}${type}`);
-
-    if (response.status != 200) {
-        throw new Error(`Not able to fetch ${type} data!`);
-    }
+export async function getTextEntity(type: string, date: Date): Promise<string> {
+    var response = await API.get(`${DIARY_URL}${type}?date=` + toISO(date));
 
     return response.data;
-}
-
-export function getWeekHabits(): WeekHabit[] {
-    return [
-        {
-            id: 0,
-            checks: [false, true, false, false, true, false, true],
-            text: "Начать вставать в 6 часов утра"
-        },
-        {
-            id: 1,
-            checks: [false, true, false, true, true, true, true],
-            text: "Бросить курить"
-        },
-        {
-            id: 2,
-            checks: [false, true, false, false, false, false, false],
-            text: "Читать каждый день минимум час"
-        }
-    ];
-}
-
-export function saveRites(rites: RiteData[]) {
-    console.log(`Saving rites ${ rites.map<string>(rite => rite.text + `: ${rite.completed}`) } to ${ new Date() } by user `);
-}
-
-export function saveFocus(focus: string) {
-    console.log(`Saving focus ${ focus } to ${ new Date() } by user `);
-}
-
-export function saveThanks(thanks: string) {
-    console.log(`Saving focus ${ thanks } to ${ new Date() } by user `);
-}
-
-export function saveInsight(insight: string) {
-    console.log(`Saving focus ${ insight } to ${ new Date() } by user`);
-}
-
-export function saveProblems(problems: string) {
-    console.log(`Saving focus ${ problems } to ${ new Date() } by user `);
-}
-
-export function saveResults(results: string) {
-    console.log(`Saving focus ${ results } to ${ new Date() } by user `);
-}
-
-export function saveTodayDeeds(todayDeeds: TodayDeeds[]) {
-    console.log(`Saving today deeds: ${todayDeeds.map(deed => `{ level: ${ deed.level }, text: ${ deed.text } }, `) } to ${new Date()} by user `);
-}
-
-export function saveTomorrowMainTasks(tasks: string) {
-    console.log(`Saving focus ${ tasks } to ${new Date()} by user `);
-}
-
-export function saveWeekHabits(data: WeekHabit[]) {
-    console.log(`Saving habits ${ data.map(weekHabit => weekHabit.checks) } to ${ new Date() } by user `);
-}
-
-export function setWorkHappiness(data: TrackerData) {
-    console.log(`Saving work happiness ${ data.currentStep } to ${ new Date() } by user `);
-}
-
-export function setSelfHappiness(data: TrackerData) {
-    console.log(`Saving self happiness ${ data.currentStep } to ${ new Date() } by user `);
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 interface ProtectedRouteProperties {
+    invert?: boolean;
     children: React.ReactNode | React.ReactNode[];
 }
 
@@ -14,7 +15,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProperties) => {
 
     useEffect(() => {
         (async () => {
-            setAuthorized(await isLoggedIn());
+            setAuthorized(import.meta.env.VITE_NO_AUTH_MODE === "true" || await isLoggedIn());
         })();
     }, []);
 

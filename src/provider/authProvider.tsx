@@ -6,7 +6,7 @@ interface AuthContextType {
   token: string;
   user: UserInfo | null,
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoggedIn: () => Promise<boolean>;
 }
 
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: AuthProviderProperties) => {
         setToken(data.token);
         setUser({ email: data.email, sureName: data.sureName, firstName: data.firstName, achieve: data.achieve, birthDate: data.birthDate });
       },
-      logout: () => {
+      logout: async () => {
         setToken("");
         setUser(null);
       },

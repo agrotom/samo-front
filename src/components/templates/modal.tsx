@@ -2,7 +2,7 @@
 
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import TextHeader from '../atoms/text-header';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 interface ModalProperties {
     header?: string;
@@ -18,6 +18,8 @@ interface ModalProperties {
 }
 
 export default function Modal({ header = '', children, onCancel, onSubmit, open, setOpen, submitText = 'ok', cancelText = 'cancel' }: ModalProperties) {
+
+    const intl = useIntl();
 
     return (
         <Dialog open={open} onClose={setOpen} className="relative z-50 text-primary">
@@ -46,8 +48,9 @@ export default function Modal({ header = '', children, onCancel, onSubmit, open,
                         <div className="px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t-2 border-t-brand-active">
                             <button
                                 type="button"
+                                title={ `${ intl.formatMessage({ id: submitText }) }` }
                                 onClick={() => { setOpen(false); onSubmit?.(); }}
-                                className="inline-flex w-full justify-center rounded-md bg-button px-3 py-2 text-sm font-semibold text-white hover:bg-button-hover sm:ml-3 sm:w-auto"
+                                className="cursor-pointer inline-flex w-full justify-center rounded-md bg-button px-3 py-2 text-sm font-semibold text-white hover:bg-button-hover sm:ml-3 sm:w-auto"
                                 >
                                 <FormattedMessage id={submitText} />
                             </button>
@@ -55,9 +58,10 @@ export default function Modal({ header = '', children, onCancel, onSubmit, open,
                                 cancelText != '' &&
                                 <button
                                     type="button"
+                                    title={ `${ intl.formatMessage({ id: submitText }) }` }
                                     data-autofocus
                                     onClick={() => { setOpen(false); onCancel?.(); }}
-                                    className="mt-3 inline-flex w-full justify-center rounded-md bg-red-500 px-3 py-2 text-white text-sm font-semibold inset-ring inset-ring-white/5 hover:bg-red-400 sm:mt-0 sm:w-auto"
+                                    className="cursor-pointer mt-3 inline-flex w-full justify-center rounded-md bg-red-500 px-3 py-2 text-white text-sm font-semibold inset-ring inset-ring-white/5 hover:bg-red-400 sm:mt-0 sm:w-auto"
                                     >
                                     <FormattedMessage id={cancelText} />
                                 </button>

@@ -8,7 +8,7 @@ import { MdCheckBox, MdOutlineBarChart } from "react-icons/md";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useLayout } from "@/provider/layoutProvider";
 import setIsDaily from "@/util/dailySwitch";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useAuth } from "@/provider/authProvider";
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +22,8 @@ function Sidebar({ isExpanded, setIsExtended }: SidebarProperties) {
     const { logout } = useAuth();
 
     const navigate = useNavigate();
+
+    const intl = useIntl();
 
     const isHidden = () => isExpanded() ? '' : 'hidden';
     const toggle = () => setIsExtended(!isExpanded()); //${ !isMobile ? (isExpanded() ? 'sm:w-72' : 'w-27') : (isExpanded() ? 'w-full' : '-translate-x-full w-full') }
@@ -85,12 +87,12 @@ function Sidebar({ isExpanded, setIsExtended }: SidebarProperties) {
                             {
                                 layoutData.currentPage === 'diary' &&
                                 <SidebarElement className={`flex items-center justify-center mx-auto lg:hidden  ${ isHidden() }`}>
-                                    <button onClick={ () => { setIsDaily(layoutData.setIsDaily, layoutData.setIsDarkMode, true); } } className={`px-2 cursor-pointer ${layoutData.isDaily ? "border-b-4 border-active-bar font-bold" : ''}`}><FormattedMessage id="morning_record" /></button>
-                                    <button onClick={ () => { setIsDaily(layoutData.setIsDaily, layoutData.setIsDarkMode, false); } } className={`px-2 cursor-pointer ml-5 ${!layoutData.isDaily ? "border-b-4 border-active-bar font-bold" : ''}`}><FormattedMessage id="afternoon_record" /></button>
+                                    <button type="button" title={ `${ intl.formatMessage({ id: "morning_record" }) }` } onClick={ () => { setIsDaily(layoutData.setIsDaily, layoutData.setIsDarkMode, true); } } className={`px-2 cursor-pointer ${layoutData.isDaily ? "border-b-4 border-active-bar font-bold" : ''}`}><FormattedMessage id="morning_record" /></button>
+                                    <button type="button" title={ `${ intl.formatMessage({ id: "afternoon_record" }) }` } onClick={ () => { setIsDaily(layoutData.setIsDaily, layoutData.setIsDarkMode, false); } } className={`px-2 cursor-pointer ml-5 ${!layoutData.isDaily ? "border-b-4 border-active-bar font-bold" : ''}`}><FormattedMessage id="afternoon_record" /></button>
                                 </SidebarElement>
                             }
                             <SidebarElement className={`flex flex-col absolute bottom-0 items-center category justify-center mb-10 ${isHidden()}`}>
-                                <BorderButton onClick={ () => { logout(); navigate("/signin"); }}>
+                                <BorderButton type="button" title={ `${ intl.formatMessage({ id: "sign_out" }) }` } onClick={ async () => { layoutData.setCurrentPage('signin'); logout(); navigate("/signin"); }}>
                                     <FormattedMessage id="sign_out" />
                                 </BorderButton>
                             </SidebarElement>

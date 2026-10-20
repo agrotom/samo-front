@@ -1,7 +1,7 @@
 import axios from "axios"
 
 export const API = axios.create({
-  baseURL: "http://localhost:3000/api/v1/",
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json"
   }
@@ -9,13 +9,40 @@ export const API = axios.create({
 
 API.interceptors.request.use(
   config => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ` + token
+        if (import.meta.env.VITE_NO_AUTH_MODE === "true") {
+            console.warn("[NO_AUTH] Request skipped:", config.url);
+
+            return Promise.reject({
+                __noAuthSkip: true,
+                config,
+            });
+        }
+        const token = localStorage.getItem("token");
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        if (token) {
+        config.headers.Authorization = `Bearer ` + token
+        }
+
+        config.headers.set("X-TimeZone", timeZone);
+
+        return config;
     }
-    return config;
-  },
-  error => Promise.reject(error)
+);
+
+API.interceptors.response.use(
+    res => res,
+    err => {
+        if (err.__noAuthSkip) {
+            return Promise.resolve({
+                data: null,
+                skipped: true,
+                config: err.config,
+            });
+        }
+
+        return Promise.reject(err);
+    }
 );
 
 export interface AuthResponse {
@@ -34,7 +61,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
         return response.data;
     }
     catch (error: any) {
-        throw error.message || "Login failed";
+        throw error.response?.data?.message || "unknown_error";
     }
 };
 
@@ -54,7 +81,7 @@ export const register = async (
 
         return response.data;
     } catch (error: any) {
-        throw error.response?.data || "Login failed";
+        throw error.response?.data?.message || "unknown_error";
     }
 }
 

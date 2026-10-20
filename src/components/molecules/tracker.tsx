@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import type EditableProperties from "../../util/editable";
+import type EditableProperties from "../../interfaces/editable";
 import InlineEditableText from "../atoms/editableDiv";
 import { clamp } from "@/util/math";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { useIntl } from "react-intl";
 
 const MAX_STEPS = 11;
 const MIN_STEPS = 2;
@@ -24,19 +25,23 @@ interface TrackerProperties extends EditableProperties {
     label?: string;
     totalSteps?: number;
     step?: number;
+    disabled?: boolean;
     onChange?: (event: TrackerChangedEvent) => void;
     onDelete?: () => void;
     stretch?: boolean;
     classNames?: TrackerClassNames;
+    noLabel?: boolean;
 }
 
-export default function Tracker({ classNames = { container: '', tracker: '' }, label = '', totalSteps = 11, step = 1, onChange, onDelete, editable, stretch = false }: TrackerProperties) {
+export default function Tracker({ classNames = { container: '', tracker: '' }, disabled = false, noLabel = false, label = '', totalSteps = 11, step = 1, onChange, onDelete, editable, stretch = false }: TrackerProperties) {
     const [currentStep, setCurrentStep] = useState<number>(clamp(step, 1, totalSteps));
     const [totalStepsNow, setTotalStepsNow] = useState<number>(totalSteps);
     const [tempTotalSteps, setTempTotalSteps] = useState<number>(totalSteps);
     const [dragging, setDragging] = useState<boolean>(false);
 
     const barRef = useRef<HTMLDivElement>(null);
+
+    const intl = useIntl();
 
     useEffect(() => {
         if (currentStep > totalStepsNow) {
@@ -54,7 +59,7 @@ export default function Tracker({ classNames = { container: '', tracker: '' }, l
     }
 
     const updateValue = (clientX: number) => {
-        if (!barRef.current) return;
+        if (!barRef.current || disabled) return;
         const rect = barRef.current.getBoundingClientRect();
         const relative = (clientX - rect.left) / rect.width;
         const step = Math.floor(relative * totalStepsNow) + 1;
@@ -103,12 +108,12 @@ export default function Tracker({ classNames = { container: '', tracker: '' }, l
     <>
         <div className={`w-full sm:flex sm:flex-col md:flex-row items-center gap-6 select-none touch-none ${classNames.container}`}>
             {
-                label != '' &&
+                !noLabel &&
                 <div className="flex flex-row">
-                    <button className={ `cursor-pointer mr-5 ${ !editable && 'hidden' }` } onClick={ onDelete }>
+                    <button type="button" title={ `${ intl.formatMessage({ id: "delete" }) }` } className={ `cursor-pointer mr-5 ${ !editable && 'hidden' }` } onClick={ onDelete }>
                         <FaRegTrashAlt/>
                     </button>
-                    <InlineEditableText initText={label} editingAllow={editable} classNames={ { container: "text-left text-sm text-primary w-fit", input: "field-sizing" } } />
+                    <InlineEditableText initText={label} editingAllow={editable && !disabled} onChange={ newName => onChange?.({ name: newName, currentStep: clamp(currentStep, 1, totalStepsNow), totalSteps: clamp(totalStepsNow, MIN_STEPS, MAX_STEPS) }) } classNames={ { container: "text-left text-sm text-primary w-fit", input: "field-sizing" } } />
                 </div>
             }
             <div className={`w-full ${ !stretch && 'max-w-md' } select-none ml-auto ${classNames.tracker}`}>
@@ -119,7 +124,7 @@ export default function Tracker({ classNames = { container: '', tracker: '' }, l
                     </div>
                     ))}
                     <div className={`text-sm font-medium text-center w-4 text-primary`}>
-                        <InlineEditableText onChange={ onTotalStepsChanged } onBlur={() => setTotalStepsNow(clamp(tempTotalSteps, MIN_STEPS, MAX_STEPS))} editingAllow={editable} numberOnly initText={`${totalStepsNow - 1}`} classNames={ { container: "overflow-hidden h-5", input: "w-full" } } />
+                        <InlineEditableText onChange={ onTotalStepsChanged } onBlur={() => setTotalStepsNow(clamp(tempTotalSteps, MIN_STEPS, MAX_STEPS))} editingAllow={editable && !disabled} numberOnly initText={`${totalStepsNow - 1}`} classNames={ { container: "overflow-hidden h-5", input: "w-full" } } />
                     </div>
                 </div>
                 <div className="relative">

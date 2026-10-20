@@ -1,0 +1,1 @@
+export type PageType = "home" | "diary" | "objectives" | "lists" | "totals" | "settings" | "signin"

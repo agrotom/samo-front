@@ -1,4 +1,4 @@
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import LabeledInput from "../molecules/labeledInput";
 import { useState } from "react";
 import SignFormTemplate from "../templates/signFormTemplate";
@@ -15,12 +15,14 @@ interface SignInFormProperties {
 
 export default function SignInForm({ classNames }: SignInFormProperties) {
 
+    const intl = useIntl();
+
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
     const [error, setError] = useState<string>('');
 
-    const { token, login, logout, isLoggedIn } = useAuth();
+    const { login } = useAuth();
 
     const navigate = useNavigate();
 
@@ -30,7 +32,16 @@ export default function SignInForm({ classNames }: SignInFormProperties) {
             await login(email, password);
             navigate("/");
         } catch (error: any) {
-            setError(error);
+            var errorMessage = "error_unknown";
+            
+            if (error == "user_not_exists") {
+                errorMessage = "error_login_failed_not_exists"
+            }
+            else if (error == "bad_credentials") {
+                errorMessage = "error_register_failed_bad"
+            }
+            
+            setError(intl.formatMessage({ id: errorMessage }));
         }
     };
 

@@ -1,35 +1,36 @@
-import { useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import Calendar from "@/components/molecules/calendar";
-import BlockGoalsList from "@/components/templates/blockGoalsList";
 import BlockInput from "@/components/templates/blockInput";
 import BlockRitesList from "@/components/templates/blockRitesList";
-import tracker_image from '@/assets/tracker_image.svg'
 import { useLayout } from "@/provider/layoutProvider";
 import BlockStar, { StarLabel } from "@/components/templates/blockStar";
 import BlockHappy from "../templates/blockHappy";
 import Modal from "@/components/templates/modal";
 import TextHeader from "../atoms/text-header";
-import NoteImage from "@/assets/note.svg";
-import BottomImage from "@/assets/bottom_image_left.svg";
-import CornerImage from "@/assets/corner_image.svg";
 import useDiaryController from "@/controller/diaryController";
 import useHappyBlockController from "@/controller/happyBlockController";
 import useStarsController from "@/controller/starsController";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useAuth } from "@/provider/authProvider";
+import List from "../organisms/list";
+import useListsController from "@/controller/listsController";
+import { NoteImage, TrackerImage } from "../atoms/Sprite";
 
 interface DiaryProperties {
     date: Date;
+    disabled?: boolean;
     createCalendar: (date: Date) => JSX.Element;
 }
 
-export function DiaryLight({ date, createCalendar }: DiaryProperties) {
+export function DiaryLight({ date, disabled, createCalendar }: DiaryProperties) {
 
     const focusText = useDiaryController(state => state.focusText);
     const setFocusText = useDiaryController(state => state.setFocusText);
 
     const thanksText = useDiaryController(state => state.thanksText);
     const setThanksText = useDiaryController(state => state.setThanksText);
+
+    const getFavorites = useListsController(state => state.getFavorites);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-1 md:gap-4 h-full">
@@ -40,37 +41,35 @@ export function DiaryLight({ date, createCalendar }: DiaryProperties) {
                             createCalendar(date)
                         }
                         <div className="relative bg-brand md:col-start-1 p-6 rounded-lg w-full h-full min-h-0 overflow-hidden">
-                            <img src={CornerImage} className="absolute rotate-y-180 top-0 -left-3 w-full pointer-events-none hidden lg:block" />
-                            <BlockRitesList classNames={{ container: "h-full box-border" }} />
+                            <BlockRitesList disabled={disabled} classNames={{ container: "h-full box-border" }} />
 
                         </div>
                     </div>
                     <div className="relative bg-brand md:col-start-2 md:row-start-1 p-6 rounded-lg h-64 md:h-full overflow-hidden">
 
-                            <BlockInput header="focus_block_header" initText={ focusText } onChange={ text => setFocusText(text) }/>
+                            <BlockInput name="focus" disabled={disabled} header="focus_block_header" initText={ focusText } onChange={ text => setFocusText(text) }/>
                     </div>
                 </div>
                 <div className="relative bg-brand p-6 rounded-lg md:row-start-2 md:row-span-2 md:col-span-2 h-64 md:h-full overflow-hidden">
-                    <img src={BottomImage} className="absolute w-full left-0 -bottom-5 pointer-events-none hidden lg:block" />
-                    <BlockInput classNames={{ container: "lg:pb-10" }} header="thanks" initText={ thanksText } onChange={ text => setThanksText(text) }
+                    <BlockInput disabled={disabled} classNames={{ container: "lg:pb-10" }} header="thanks" initText={ thanksText } onChange={ text => setThanksText(text) }
                         children={
-                            <img className="mx-auto ml-10 my-auto mr-15 size-48 hidden lg:block" src={tracker_image}/>
+                            <TrackerImage className="mx-[5%] my-auto size-48 hidden lg:block" />
                         }/>
                 </div>
 
             </div>
             <div className="relative flex flex-col bg-brand  p-6 row-start-4 md:col-start-3 md:row-start-1 md:row-span-2 h-full w-full rounded-lg overflow-hidden">
-                <img src={BottomImage} className="absolute rotate-y-180 left-0 bottom-0 pointer-events-none hidden lg:block" />
-                <BlockGoalsList/>
+                <List showBar={ false } allowEditing={ false } loadedData={ { id: -1, header: "Задачи", goals: getFavorites(), createdAt: new Date() } } />
             </div>
         </div>
     )
 }
 
-export function DiaryDark({ date, createCalendar }: DiaryProperties) {
+export function DiaryDark({ date, disabled = false, createCalendar }: DiaryProperties) {
     const [openModal, setOpenModal] = useState<boolean>(false);
 
     const insightText = useDiaryController(state => state.insightText);
+
     const setInsightText = useDiaryController(state => state.setInsightText);
     
     const problemsText = useDiaryController(state => state.problemsText);
@@ -88,33 +87,33 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
 
     const { user } = useAuth();
 
+    const intl = useIntl();
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-[auto_1fr_1fr] gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full grid-rows-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-[auto_1fr_1fr] gap-4 h-full">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-2 grid-rows-1 md:h-full">
                         {
                             createCalendar(date)
                         }
                         <div onClick={() => setOpenModal(!openModal)} className="flex bg-brand  lg:col-start-2 p-2 px-6 rounded-lg w-full h-fit cursor-pointer text-center justify-center items-center">
-                            <button className="font-medium text-lg cursor-pointer">
+                            <button type="button" title={ `${ intl.formatMessage({ id: "send" }) }` } className="font-medium text-lg cursor-pointer">
                                 <FormattedMessage id="send" />
                             </button>
                         </div>
                     </div>
                 
                     <div className="relative bg-brand p-6 rounded-lg col-span-2 h-50 md:h-full overflow-hidden">
-                        <img src={CornerImage} className="absolute rotate-y-180 -top-2 -left-5 w-full pointer-events-none hidden lg:block" />
-                        <BlockInput header="insight_block_header" initText={ insightText } onChange={text => setInsightText(text)}/>
+                        <BlockInput name="insight" disabled={disabled} header="insight_block_header" initText={ insightText } onChange={text => setInsightText(text)}/>
                     </div>
                     <div className="relative bg-brand p-6 rounded-lg col-span-2 h-50 md:h-full overflow-hidden">
-                        <BlockInput header="problems" initText={ problemsText } onChange={text => setProblemsText(text)}/>
+                        <BlockInput name="problems" disabled={disabled} header="problems" initText={ problemsText } onChange={text => setProblemsText(text)}/>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 row-start-2 gap-4 h-full">
                     <div className="relative bg-brand p-6 rounded-lg h-50 md:h-full overflow-hidden">
-                        <img src={BottomImage} className="absolute rotate-y-180 left-0 bottom-0 pointer-events-none hidden lg:block" />
-                        <BlockInput header="results" initText={ resultsText } onChange={text => setResultsText(text)} classNames={
+                        <BlockInput name="results" disabled={disabled} header="results" initText={ resultsText } onChange={text => setResultsText(text)} classNames={
                             {
                                 container: "lg:mb-8"
                             }
@@ -122,13 +121,13 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
                     </div>
                 </div>
 
-                <div className="relative bg-brand p-6 rounded-lg lg:col-start-2 h-94 overflow-hidden">
-                    <img className="absolute right-25 top-40 pointer-events-none hidden lg:block" src={NoteImage}/>
-                    <BlockStar />      
+                <div className="relative bg-brand p-6 rounded-lg lg:col-start-2 h-full overflow-hidden">
+                    <NoteImage className="absolute bottom-5 right-0 pointer-events-none hidden lg:block" />
+                    <BlockStar disabled={disabled} />      
                 </div>
 
                 <div className="bg-brand p-6 px-8 rounded-lg lg:col-start-2 h-full">
-                    <BlockHappy />
+                    <BlockHappy disabled={disabled} />
                 </div>
 
                 <Modal header="sending_header" submitText="send" open={openModal} setOpen={setOpenModal}>
@@ -136,7 +135,7 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
                         <div className="flex flex-row">
                             <TextHeader localization={ false } text={
                                 user?.sureName + ' ' + user?.firstName
-                            } />
+                            } className="wrap-break-word mr-5" />
                             <div className="flex flex-col ml-auto">
                                 <div className="flex flex-row justify-between">
                                     <TextHeader text='work'/>
@@ -192,13 +191,20 @@ export function DiaryDark({ date, createCalendar }: DiaryProperties) {
 }
 
 export default function Diary() {
-    const [date, setDate] = useState<Date>(new Date())
     const layoutData = useLayout();
+
+    const [disabled, setDisabled] = useState<boolean>(() => {
+        return layoutData.diaryDate.toDateString() != new Date().toDateString();
+    });
+
+    useEffect(() => {
+        setDisabled(layoutData.diaryDate.toDateString() != new Date().toDateString());
+    }, [layoutData.diaryDate]);
 
     const createCalendar = (date: Date) => {
         return (
-            <div className="bg-brand  rounded-lg w-full h-fit p-2 px-6">
-                <Calendar onChange={ newDate => setDate(newDate) } currentDate={date}/> 
+            <div className="bg-brand rounded-lg w-full h-fit p-2 px-6">
+                    <Calendar onChange={ layoutData.setDiaryDate } currentDate={date}/>
             </div>
         );
     }
@@ -207,8 +213,8 @@ export default function Diary() {
         <div className="h-full">
             {
                 layoutData.isDaily ? 
-                    <DiaryLight date={date} createCalendar={createCalendar} /> :
-                    <DiaryDark date={date} createCalendar={createCalendar} />
+                    <DiaryLight date={ layoutData.diaryDate } disabled={disabled} createCalendar={createCalendar} /> :
+                    <DiaryDark date={ layoutData.diaryDate } disabled={disabled} createCalendar={createCalendar} />
             }
         </div>
     )

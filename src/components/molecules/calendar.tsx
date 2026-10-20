@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DayPicker, Dropdown, getDefaultClassNames, YearsDropdown } from "react-day-picker";
+import { DayPicker, getDefaultClassNames } from "react-day-picker";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { LuSquareArrowDown } from "react-icons/lu";
@@ -8,41 +8,71 @@ import { createPortal } from "react-dom"
 import { ru } from "react-day-picker/locale";
 
 import { type MonthCaptionProps, useDayPicker } from "react-day-picker";
+import Selector from "../organisms/selector";
+import { useIntl } from "react-intl";
 
 function CustomCaptionComponent(props: MonthCaptionProps) {
   const { goToMonth, nextMonth, previousMonth } = useDayPicker();
 
+  const intl = useIntl();
+
   return (
-    <div className='flex flex-row items-center justify-center'>
-      <button
-        className='mx-auto'
-        disabled={!previousMonth}
-        onClick={() => previousMonth && goToMonth(previousMonth)}
-      >
-        <ChevronLeft className="w-4 h-4" />
-      </button>
-      <h2 className='text-center'>{format(props.calendarMonth.date, "LLLL", { locale: ru })}</h2>
-      <button
-        className='mx-auto'
-        disabled={!nextMonth}
-        onClick={() => nextMonth && goToMonth(nextMonth)}
-      >
-        <ChevronRight className="w-4 h-4" />
-      </button>
+    <div className="flex flex-col">
+      <CustomDropdown selected={ props.calendarMonth.date } />
+      <div className='flex flex-row items-center justify-center'>
+        <button
+          type="button"
+          title={ `${ intl.formatMessage({ id: "previousMonth" }) }` }
+          className='mx-auto'
+          disabled={!previousMonth}
+          onClick={() => previousMonth && goToMonth(previousMonth)}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <h2 className='text-center'>{ format(props.calendarMonth.date, "LLLL", { locale: ru }) }</h2>
+        <button
+          type="button" 
+          title={ `${ intl.formatMessage({ id: "nextMonth" }) }` }
+          className='mx-auto'
+          disabled={!nextMonth}
+          onClick={() => nextMonth && goToMonth(nextMonth)}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }
 
+function CustomDropdown({ selected }: { selected: Date }) {
+    const { goToMonth } = useDayPicker<{ mode: "single", required: true  }>();
+    const [ month, _ ] = useState<Date>(selected);
+
+    const currentYear = month.getFullYear();
+    const years = Array.from({ length: 100 }, (_, i) => currentYear - 99 + i).sort((a, b) => b - a);
+
+    return (
+      <Selector selectedValue={ years.indexOf(currentYear) } values={ years.map(val => val.toString()) } onChange={(val) => {
+          const newYear = Number(val);
+          const newDate = new Date(month);
+          newDate.setFullYear(newYear);
+          goToMonth(newDate);
+        }} />
+    );
+}
+
 interface CalendarProperties {
-    currentDate?: Date;
+    currentDate: Date;
     open?: boolean;
     setOpen?:(value: boolean) => void;
     onChange?: (date: Date) => void;
 }
-export default function Calendar({ currentDate = new Date(), onChange, open, setOpen }: CalendarProperties) {
+export default function Calendar({ currentDate, onChange, open, setOpen }: CalendarProperties) {
     const defaultClassNames = getDefaultClassNames();
     const [show, setShow] = useState(open ?? false);
     const [selected, setSelected] = useState<Date>(currentDate);
+
+    const intl = useIntl();
 
     useEffect(() => {
       if (open !== undefined) {
@@ -56,7 +86,10 @@ export default function Calendar({ currentDate = new Date(), onChange, open, set
               open === undefined &&
               <div className="flex flex-row cursor-pointer items-center justify-center" onClick={() => setShow(!show)}>
                   <input
+                      name="calendar"
                       type="text"
+                      title={ `${ intl.formatMessage({ id: "openCalendar" }) }` }
+                      placeholder=""
                       readOnly
                       disabled
                       value={format(selected, "dd.LL.yyyy", {locale: ru}) + ' ' + selected.toLocaleDateString("ru-RU", { weekday: 'short' }).toUpperCase()}
@@ -68,7 +101,7 @@ export default function Calendar({ currentDate = new Date(), onChange, open, set
             {show &&
                 createPortal(
                 <div
-                    className="fixed inset-0 flex justify-center items-center bg-black/20 z-[9999]"
+                    className="fixed inset-0 flex justify-center items-center bg-black/20 z-9999"
                     onClick={() => {
                       if (setOpen !== undefined) {
                         setOpen(false);
@@ -80,7 +113,7 @@ export default function Calendar({ currentDate = new Date(), onChange, open, set
                 >
                     <div
                     onClick={(e) => e.stopPropagation()}
-                    className="bg-brand  rounded-xs shadow-xl w-80 h-88"
+                    className="bg-brand rounded-xs shadow-xl w-80 h-fit p-2"
                     >
                         <DayPicker
                             locale={ru}
@@ -91,11 +124,10 @@ export default function Calendar({ currentDate = new Date(), onChange, open, set
                             navLayout="around"
                             selected={selected}
                             onSelect={value => { setSelected(value); onChange?.(value); }}
-                            captionLayout="dropdown-years"
+                            captionLayout="dropdown"
                             components={{
-                                MonthCaption: CustomCaptionComponent
+                              MonthCaption: CustomCaptionComponent
                             }}
-                            
                             classNames={{
                                 selected: `border-b-2 border-b-active-bar font-bold text-active-bar`,
                                  // Highlight the selected day

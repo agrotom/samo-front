@@ -2,7 +2,7 @@ import App from '@/App.tsx'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Diary from '@/components/pages/diary'
 import Home from '@/components/pages/home'
-import Goals from './goals'
+import Objectives from '@/components/pages/objectives'
 import NotFound from './notfound'
 import SignIn from './signin'
 import { IntlProvider } from 'react-intl'
@@ -14,6 +14,7 @@ import { useEffect } from 'react'
 import SignUp from './signup'
 import { ProtectedRoute } from '../atoms/protectedRouter'
 import { AuthProvider } from '@/provider/authProvider'
+import Lists from './lists'
 
 export default function SamoRouter() {
 
@@ -29,14 +30,14 @@ export default function SamoRouter() {
             <AuthProvider>
                 <Router>
                     <Routes>
-                        <Route element={<ProtectedRoute><App/></ProtectedRoute>}>
+                        <Route element={ <ProtectedRoute><App/></ProtectedRoute> }>
                             <Route path="/" element={<Home/>} />
                             <Route path="/home" element={<Home/>} />
                             <Route path="/diary" element={<Diary/>} />
-                            <Route path="/objectives" element={<Goals/>} />
-                            <Route path="/lists" element={<Diary/>} />
+                            <Route path="/objectives" element={<Objectives/>} />
+                            <Route path="/lists" element={<Lists/>} />
                             <Route path="/totals" element={<NotFound/>} />
-                            <Route path="/settings" element={<Diary/>} />
+                            <Route path="/settings" element={<NotFound/>} />
                         </Route>
                         <Route element={ <SignTemplate/> }>
                             <Route path="/signin" element={<SignIn/>} />

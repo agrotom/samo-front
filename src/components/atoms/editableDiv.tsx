@@ -52,7 +52,7 @@ export default function InlineEditableText({ initText = '', onChange, onBlur, li
       ) : (
         <span
           onClick={() => setEditing(true)}
-          className={`transition-colors whitespace-normal ${wrap && 'break-words'} ${classNames.span}`}
+          className={`transition-colors whitespace-normal ${wrap && 'wrap-break-word'} ${classNames.span}`}
         >
           {text == '' ? 'Введите текст' : text}
         </span>

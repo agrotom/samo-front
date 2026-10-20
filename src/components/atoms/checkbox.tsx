@@ -1,20 +1,25 @@
-import EditableDiv from "@/components/atoms/editableDiv";
+import InlineEditableText from "@/components/atoms/editableDiv";
 import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import { useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { useIntl } from "react-intl";
 
 interface CheckboxProperties {
-
+    name?: string;
+    title?: string;
     className?: string;
     value?: boolean;
     size?: number;
+    disabled?: boolean;
     onChange?: (newValue: boolean) => void;
 
 }
 
 interface SortableCheckboxProperties {
     id: number;
+    title?: string;
+    allowEditing?: boolean;
     disabled?: boolean;
     hasLabel?: boolean;
     size?: number;
@@ -31,14 +36,14 @@ interface CheckboxData {
     text: string;
 }
 
-export function SortableCheckbox({ initText = '', hasLabel = true, value = false, className = '', size = 24, id, disabled = true, onChange, onDelete, ...props }: SortableCheckboxProperties) {
+export function SortableCheckbox({ title, initText = '', hasLabel = true, value = false, className = '', size = 24, id, disabled = false, allowEditing = true, onChange, onDelete, ...props }: SortableCheckboxProperties) {
     const {
         attributes,
         listeners,
         setNodeRef,
         transform,
         transition,
-    } = useSortable({id: id, disabled: disabled});
+    } = useSortable({id: id, disabled: allowEditing});
     
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -48,23 +53,25 @@ export function SortableCheckbox({ initText = '', hasLabel = true, value = false
     const [checked, setChecked] = useState<boolean>(value);
     const [text, setText] = useState<string>(initText);
 
+    const intl = useIntl();
+
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`flex overflow-hidden items-start ${ !disabled && 'cursor-pointer' } ${className}`} {...props}>
-            <Checkbox value={value} size={size} onChange={ newValue => { setChecked(newValue); onChange?.({ value: newValue, text: text }); } } />
-            <EditableDiv initText={initText} editingAllow={!disabled} onChange={ text => { setText(text); onChange?.({ value: checked, text: text }); } } classNames={{container: 'ml-2.5'}}></EditableDiv>
-            <button className={ `cursor-pointer ml-auto mr-5 my-auto ${ disabled && 'hidden' }` } onClick={ onDelete }>
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={`flex overflow-hidden items-start ${ !allowEditing && 'cursor-pointer' } ${className}`} {...props}>
+            <Checkbox name={ `checkbox_${ id }` } title={ `${ intl.formatMessage({ id: "select" }) }` } disabled={ disabled } value={value} size={size} onChange={ newValue => { setChecked(newValue); onChange?.({ value: newValue, text: text }); } } />
+            <InlineEditableText initText={initText} editingAllow={ allowEditing && !disabled } onChange={ text => { setText(text); onChange?.({ value: checked, text: text }); } } classNames={{container: 'ml-2.5'}}></InlineEditableText>
+            <button type="button" title={ `${ intl.formatMessage({ id: "delete" }) }` } className={ `cursor-pointer ml-auto mr-5 my-auto ${ allowEditing && 'hidden' }` } onClick={ onDelete }>
                 <FaRegTrashAlt/>
             </button>
         </div>
     )
 }
 
-export function Checkbox({ value = false, size = 6, className = '', onChange }: CheckboxProperties) {
+export function Checkbox({ name, title, value = false, size = 6, disabled = false, className = '', onChange }: CheckboxProperties) {
 
     const [checked, setChecked] = useState<boolean>(value);
 
     return (
-        <input type="checkbox" style={{
+        <input type="checkbox" name={ name } title={ title } disabled={ disabled } style={{
             height: size,
             width: size
         }} checked={checked} onChange={() => { setChecked(!checked); onChange?.(!checked); }} className={`mt-0.5 accent-checkbox-on bg-checkbox-on ${className}`}></input>

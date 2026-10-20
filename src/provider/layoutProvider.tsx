@@ -1,7 +1,7 @@
 import { LOCALES } from "@/i18n/locales";
-import { type PageType } from "@/util/paging";
+import { type PageType } from "@/interfaces/paging";
 import usePersistedState from "@/hooks/usePersistedState";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface LayoutContextType {
   isDaily: boolean;
@@ -15,6 +15,9 @@ interface LayoutContextType {
 
   locale: string;
   setLocale: (value: string) => void;
+
+  diaryDate: Date;
+  setDiaryDate: (value: Date) => void;
 }
 
 const defaultContextType: LayoutContextType = {
@@ -28,7 +31,10 @@ const defaultContextType: LayoutContextType = {
   setIsDarkMode: (_: boolean) => { return; },
 
   locale: LOCALES.ENGLISH,
-  setLocale: (_: string) => { return; }
+  setLocale: (_: string) => { return; },
+
+  diaryDate: new Date,
+  setDiaryDate: (_: Date) => { return; }
 }
 
 const LayoutContext = createContext<LayoutContextType>(defaultContextType);
@@ -39,11 +45,14 @@ export function LayoutProvider({ children }: {children: React.ReactNode}) {
   const [currentPage, setCurrentPage] = usePersistedState<PageType>("currentPage", "home");
   const [locale, setLocale] = usePersistedState<string>("locale", "en-US");
 
+  const [diaryDate, setDiaryDate] = useState<Date>(new Date());
+
   return (
     <LayoutContext.Provider value={{ isDaily: isDaily, setIsDaily: setIsDaily,
                                       currentPage: currentPage, setCurrentPage: setCurrentPage,
                                       isDarkMode: isDarkMode, setIsDarkMode: setIsDarkMode,
-                                      locale: locale, setLocale: setLocale }}>
+                                      locale: locale, setLocale: setLocale,
+                                      diaryDate: diaryDate, setDiaryDate: setDiaryDate }}>
       {children}
     </LayoutContext.Provider>
   );

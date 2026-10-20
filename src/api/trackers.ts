@@ -1,52 +1,44 @@
-import type UniqueObject from "@/util/uniqueObject";
+import type UniqueObject from "@/interfaces/uniqueObject";
+import { API } from "./auth";
+import { format } from "date-fns"
 
 export interface TrackerData extends UniqueObject {
     name: string;
     currentStep: number;
     totalSteps: number;
+    createdAt: Date;
 }
 
-const trackerData: TrackerData[] = [
-    {
-        id: 0,
-        name: 'Тысячи шагов',
-        currentStep: 5,
-        totalSteps: 11
-    },
-    {
-        id: 1,
-        name: 'Стаканы воды',
-        currentStep: 4,
-        totalSteps: 9
-    },
-    {
-        id: 2,
-        name: 'Часы сна',
-        currentStep: 3,
-        totalSteps: 9
-    },
-    {
-        id: 3,
-        name: 'Часы сна',
-        currentStep: 3,
-        totalSteps: 9
-    },
-    {
-        id: 4,
-        name: 'Порций сладкого',
-        currentStep: 1,
-        totalSteps: 5
-    }
-];
-
-export function saveTrackerData(newData: TrackerData) {
-    console.log(`Saving tracker ${ newData } to ${ new Date() } by user`);
+export interface TrackerRequest {
+    name: string;
+    currentStep: number;
+    totalSteps: number;
 }
 
-export function setTrackers(newData: TrackerData[]) {
-    console.log(`Saving trackers ${ newData.map(data => data.currentStep) } to ${ new Date() } by user`);
+export interface TrackerDTO {
+    id: number;
+    name: string;
+    currentStep: number;
+    totalSteps: number;
+    createdAt: string;
 }
 
-export function getTrackers(): TrackerData[] {
-    return trackerData;
+export async function addTracker(data: TrackerRequest): Promise<number> {
+    return (await API.post("tracker", data)).data.id;
+}
+
+export async function modifyTracker(id: number, data: TrackerRequest): Promise<void> {
+    await API.put(`tracker/${ id }`, data);
+}
+
+export async function removeTracker(id: number): Promise<void> {
+    await API.delete(`tracker/${id}`);
+}
+
+export async function getTrackers(date: Date): Promise<TrackerData[]> {
+    const trackers: TrackerDTO[] = (await API.get("tracker?date=" + format(date, "yyyy-LL-dd").slice(0, 10))).data.data ?? [];
+
+    
+
+    return trackers.map(dto => ({ id: dto.id, name: dto.name, currentStep: dto.currentStep, totalSteps: dto.totalSteps, createdAt: new Date(dto.createdAt) }));
 }

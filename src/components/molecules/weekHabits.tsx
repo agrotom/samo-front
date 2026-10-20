@@ -1,8 +1,10 @@
 import { Checkbox } from "../atoms/checkbox";
 import InlineEditableText from "../atoms/editableDiv";
-import type EditableProperties from "../../util/editable";
+import type EditableProperties from "../../interfaces/editable";
 import { useEffect, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
+
+const weekdays = [ 'monday_short', 'tuesday_short', 'wednesday_short', 'thursday_short', 'friday_short', 'saturday_short', 'sunday_short' ]
 
 interface WeekHabitChangedEvent {
     checks: boolean[];
@@ -13,12 +15,16 @@ interface WeekHabitsProperties extends EditableProperties {
     onChange?: (e: WeekHabitChangedEvent) => void;
     initText: string;
     initChecks: boolean[];
+    disabled?: boolean;
+    name?: string;
 }
 
-export function WeekHabits({ initText, initChecks, onChange, editable }: WeekHabitsProperties) {
+export function WeekHabits({ name, initText, initChecks, disabled = false, onChange, editable }: WeekHabitsProperties) {
 
     const [checks, setChecks] = useState<boolean[]>(initChecks);
     const [text, setText] = useState<string>(initText);
+
+    const intl = useIntl();
 
     useEffect(() => {
         onChange?.({ checks: checks, text: text });
@@ -27,13 +33,13 @@ export function WeekHabits({ initText, initChecks, onChange, editable }: WeekHab
     return (
         <div className="grid grid-cols-7 lg:grid-cols-[auto_repeat(7,1fr)] grid-rows-2 lg:grid-rows-1 mt-2">
             <div className="lg:col-start-1 lg:row-start-1 w-64">
-                <InlineEditableText initText={initText} onChange={ text => setText(text) } editingAllow={editable} limit={30} classNames={{container: "h-7 overflow-hidden", span: "h-5"}} />
+                <InlineEditableText initText={initText} onChange={ text => setText(text) } editingAllow={editable && !disabled} limit={30} classNames={{container: "h-7 overflow-hidden", span: "h-5"}} />
             </div>
                 {
                     checks.map((check, i) => {
                         return (
                             <div key={`div-${i}`} className={`lg:col-start-${i + 2} row-start-2 lg:row-start-1 items-center justify-center text-center`}>
-                                <Checkbox key={`checkbox-${i}`} onChange={value => setChecks(checks.map((oldValue, index) => index == i ? value : oldValue)) } value={check} size={16} ></Checkbox>
+                                <Checkbox name={ `${name}_${i}` } title={ `${ intl.formatMessage({ id: weekdays[i] }) }` } disabled={disabled} key={`checkbox-${i}`} onChange={value => setChecks(checks.map((oldValue, index) => index == i ? value : oldValue)) } value={check} size={16} ></Checkbox>
                             </div>
                         );
                     })
@@ -47,8 +53,6 @@ interface WeekHabitsGridProperties {
 }
 
 function getWeekDays() {
-    
-    const weekdays = [ 'monday_short', 'tuesday_short', 'wednesday_short', 'thursday_short', 'friday_short', 'saturday_short', 'sunday_short' ]
 
     return (
         <>

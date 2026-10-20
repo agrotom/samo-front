@@ -1,8 +1,9 @@
 import { FaCheck } from "react-icons/fa";
-import EditImage from "@/components/ui/svg/edit"
 import { GoPlus } from "react-icons/go";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import InlineEditableText from "./editableDiv";
+import { RxCross2 } from "react-icons/rx";
+import { EditIcon } from "./Icon";
 
 interface TextHeaderProperties {
     text: string;
@@ -13,9 +14,13 @@ interface TextHeaderProperties {
 
 interface ControllableHeaderProperties extends TextHeaderProperties {
     editable: boolean;
+    disabled?: boolean;
+    allowHeaderEdit?: boolean;
     setEditable: (data: boolean) => void;
+    onChange?: (value: string) => void;
     onDone?: () => void;
     onAdd?: () => void;
+    onDelete?: () => void;
 }
 
 interface EditableTextHeaderProperties extends TextHeaderProperties {
@@ -31,26 +36,40 @@ export default function TextHeader({ text, className = '', localization = true, 
     )
 }
 
-export function EditableTextHeader({ text, className = '', localization = true, children, editable, onChange, ...props }: EditableTextHeaderProperties) {
+export function EditableTextHeader({ text, className = '', localization = false, children, editable, onChange, ...props }: EditableTextHeaderProperties) {
     return (
-        <p className={`font-bold text-lg ${className}`} {...props}>
-            <InlineEditableText initText={text} editingAllow={ editable } onChange={ onChange } />
-        </p>
+        <div className={`font-bold text-lg ${className}`} {...props}>
+            <InlineEditableText classNames={ { input: "w-24" } } initText={text} editingAllow={ editable } onChange={ onChange } />
+        </div>
     )
 }
 
-export function ControllableHeader({ text, editable, setEditable, onDone, onAdd }: ControllableHeaderProperties) {
+export function ControllableHeader({ text, disabled, allowHeaderEdit = false, editable, setEditable, onChange, onDone, onAdd, onDelete }: ControllableHeaderProperties) {
+    
+    const intl = useIntl();
+    
     return (
         <div className="flex flex-row items-center z-20">
-            <TextHeader text={ text }/>
+            {
+                allowHeaderEdit ?
+                <EditableTextHeader text={ text } editable={ editable } onChange={ onChange } /> :
+                <TextHeader text={ text } />
+            }
+            
             <div className="flex flex-row ml-auto items-center space-x-3">
                 {
+                    onDelete && editable &&
+                    <button type="button" title={ `${ intl.formatMessage({ id: "delete" }) }` } className='cursor-pointer' onClick={ onDelete }>
+                        <RxCross2 className='size-5' />
+                    </button>
+                }
+                {
                     onAdd && editable &&
-                    <button className="cursor-pointer" onClick={onAdd}>
+                    <button type="button" title={ `${ intl.formatMessage({ id: "add" }) }` } className="cursor-pointer" onClick={ onAdd }>
                         <GoPlus className="size-7"/>
                     </button>
                 }
-                <button className='cursor-pointer' onClick={ () => {
+                <button type="button" title={ `${ intl.formatMessage({ id: editable ? "ok" : "edit" }) }` } className={`cursor-pointer ${ disabled && 'hidden' }`} onClick={ () => {
                         if (editable) {
                             onDone?.();
                         }
@@ -59,7 +78,7 @@ export function ControllableHeader({ text, editable, setEditable, onDone, onAdd 
                     } }>
                     {
                         !editable ?
-                        <EditImage/> :
+                        <EditIcon /> :
                         <FaCheck className="text-active-bar"/>
                     }
                 </button>
